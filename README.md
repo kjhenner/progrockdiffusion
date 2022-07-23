@@ -110,7 +110,6 @@ git clone https://github.com/crowsonkb/guided-diffusion
 git clone https://github.com/openai/CLIP.git
 git clone https://github.com/mlfoundations/open_clip.git
 git clone https://github.com/assafshocher/ResizeRight.git
-git clone https://github.com/CompVis/latent-diffusion.git
 git clone https://github.com/CompVis/taming-transformers
 pip install -e ./CLIP
 pip install -e ./guided-diffusion

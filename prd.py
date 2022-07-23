@@ -153,6 +153,7 @@ cutn_batches_final = None
 max_frames = 10000
 interp_spline = "Linear"
 init_image = None
+init_masked = None
 init_scale = 1000
 skip_steps = 0
 skip_steps_ratio = 0.0
@@ -160,6 +161,8 @@ frames_scale = 1500
 frames_skip_steps = "60%"
 perlin_init = False
 perlin_mode = "mixed"
+perlin_contrast = 1.0
+perlin_brightness = 1.0
 skip_augs = False
 randomize_class = True
 clip_denoised = False
@@ -617,6 +620,8 @@ for setting_arg in cl_args.settings:
                 interp_spline = (settings_file['interp_spline'])
             if is_json_key_present(settings_file, 'init_image'):
                 init_image = (settings_file['init_image'])
+            if is_json_key_present(settings_file, 'init_masked'):
+                init_masked = (settings_file['init_masked'])
             if is_json_key_present(settings_file, 'init_scale'):
                 init_scale = (settings_file['init_scale'])
             if is_json_key_present(settings_file, 'skip_steps'):
@@ -633,6 +638,10 @@ for setting_arg in cl_args.settings:
                 perlin_init = (settings_file['perlin_init'])
             if is_json_key_present(settings_file, 'perlin_mode'):
                 perlin_mode = (settings_file['perlin_mode'])
+            if is_json_key_present(settings_file, 'perlin_contrast'):
+                perlin_contrast = (settings_file['perlin_contrast'])
+            if is_json_key_present(settings_file, 'perlin_brightness'):
+                perlin_brightness = (settings_file['perlin_brightness'])
             if is_json_key_present(settings_file, 'skip_augs'):
                 skip_augs = (settings_file['skip_augs'])
             if is_json_key_present(settings_file, 'randomize_class'):
@@ -1020,18 +1029,17 @@ def randomize_prompts(prompts):
     # take a list of prompts and handle any _random_ elements
     newprompts = []
     for prompt in prompts:
-        if "_" in prompt:
-            while "_" in prompt:
-                start = prompt.index('_')
-                end = prompt.index('_', start+1)
-                swap = prompt[(start + 1):end]
-                swapped = randomizer(swap)
-                prompt = prompt.replace(f'_{swap}_', swapped, 1)
-            newprompt = prompt
-        elif "<" in prompt:
+        if "<" in prompt:
             newprompt = dynamic_value(prompt)
         else:
             newprompt = prompt
+        if "_" in newprompt:
+            while "_" in newprompt:
+                start = newprompt.index('_')
+                end = newprompt.index('_', start+1)
+                swap = newprompt[(start + 1):end]
+                swapped = randomizer(swap)
+                newprompt = newprompt.replace(f'_{swap}_', swapped, 1)
         newprompts.append(newprompt)
     return newprompts
 
@@ -1214,8 +1222,13 @@ def create_perlin_noise(octaves=[1, 1, 1, 1], width=2, height=2, grayscale=True)
         out = TF.resize(size=(side_y, side_x), img=out)
         out = TF.to_pil_image(out.clamp(0, 1).squeeze())
 
-    out = ImageOps.autocontrast(out)
-    return out
+    out = ImageOps.autocontrast(out, preserve_tone=True)
+    out2 = ImageEnhance.Contrast(out)
+    out3 = out2.enhance(perlin_contrast)
+    out4 = ImageEnhance.Brightness(out3)
+    del out2
+    del out3
+    return out4.enhance(perlin_brightness)
 
 
 def gen_perlin():
@@ -1447,14 +1460,39 @@ def do_run(batch_num, slice_num=-1):
                     initial_weights = True
                     break
 
+        # if no init_masked is provided, we make one with the render mask
+        def make_masked_init(image, mask):
+            image = np.array(image)
+            image = image.astype(np.float32)/255.0
+            image = image[None].transpose(0,3,1,2)
+            image = torch.from_numpy(image)
+
+            mask = np.array(mask)
+            mask = mask.astype(np.float32)/255.0
+            mask = mask[None,None]
+            mask = torch.from_numpy(mask)
+
+            masked_image = (0+mask)*image
+            return masked_image
+
         if (not initial_weights):
             do_weights(0, clip_managers)
 
+        #Init Image stuff:
+        #init is ultimately what we render against
+        #init_image is the image to use to start with, unless we have init_masked, in which case we just store init_image
+        #init_masked is a secondary init image with data only where we want to render (can be perlin instead, see below)
+        #render_mask is tells us what part of the render to keep (white) and what part to restore from init_image
+        #TODO: consider how this is affected by gobig
         init = None
         if init_image is not None:
             init_img = Image.open(fetch(init_image)).convert('RGB')
             init_img = init_img.resize((args.side_x, args.side_y), get_resampling_mode())
-            init = TF.to_tensor(init_img).to(device).unsqueeze(0).mul(2).sub(1)
+            if init_masked is not None:
+                init_masked_img = Image.open(fetch(init_masked)).convert('RGB')
+                init = TF.to_tensor(init_masked_img).to(device).unsqueeze(0).mul(2).sub(1)
+            else:
+                init = TF.to_tensor(init_img).to(device).unsqueeze(0).mul(2).sub(1)
             init_img = init_img.convert('RGBA') # now that we've made our init, we add an alpha channel for later compositing
 
         rmask = None
@@ -1462,6 +1500,13 @@ def do_run(batch_num, slice_num=-1):
             rmask_img = Image.open(fetch(render_mask)).convert('L')
             rmask_img = rmask_img.resize((args.side_x, args.side_y), get_resampling_mode())
             rmask = TF.to_tensor(rmask_img).to(device).unsqueeze(0)
+            if init_masked is None:
+                init = gen_perlin()
+                init = TF.to_pil_image(init.clamp(0, 1).squeeze())
+                init_mask = make_masked_init(init, rmask_img).to(device)
+                init_mask = TF.to_pil_image(init_mask.clamp(0, 1).squeeze())
+                init = TF.to_tensor(init_mask).to(device).unsqueeze(0).mul(2).sub(1)
+                #init_mask.save('init_mask.png')
 
         if (args.perlin_init == True) and (init_image == None):
             init = gen_perlin()
@@ -1699,7 +1744,7 @@ def do_run(batch_num, slice_num=-1):
                                     print('\nUsing render mask to composite rendered image with init image.')
                                     image2 = image.copy()
                                     image2.putalpha(rmask_img)
-                                    image2.save('test.png')
+                                    #image2.save('test.png')
                                     image3 = image2.copy()
                                     image3 = Image.alpha_composite(init_img, image3)
                                     image = image3.copy()
@@ -1802,6 +1847,7 @@ def save_settings():
         'interp_spline': interp_spline,
         # 'rotation_per_frame': rotation_per_frame,
         'init_image': init_image,
+        'init_masked': init_masked,
         'render_mask': render_mask,
         'init_scale': init_scale,
         'skip_steps': skip_steps,
@@ -2285,7 +2331,8 @@ clip_managers = [
         cut_count_multiplier=eval(model_name),
         device=device,
         use_cut_heatmap=True,
-        pad_inner_cuts=True
+        pad_inner_cuts=True,
+        download_root=model_path
     )
     for model_name in CLIP_NAME_MAP.keys() if eval(model_name)
 ]
@@ -2821,12 +2868,13 @@ def mergeimgs(source, slices):
 
 # Slices an image into the configured number of chunks. Overlap is currently 64px but should become dynamic
 # Also slices render_masks to match
-def slice(source, rmask):
+def slice(source, rmask, imask):
     global slices_todo
     width, height = source.size
     overlap = 64  # int(height / slices_todo / 4)
     slices = []
     slice_rmasks = []
+    slice_imasks = []
     x = 0
     y = 0
     i = 0
@@ -2841,11 +2889,18 @@ def slice(source, rmask):
         edgex = slice_width
         while i < slices_todo:
             slices.append(source.crop((x, y, edgex, height)))
-            slice_rmasks.append(rmask.crop((x, y, edgex, height)))
+            if rmask is not None:
+                slice_rmasks.append(rmask.crop((x, y, edgex, height)))
+            else:
+                slice_rmasks.append(None)
+            if imask is not None:
+                slice_imasks.append(imask.crop((x, y, edgex, height)))
+            else:
+                slice_imasks.append(None) # does this work?
             x += slice_width - overlap
             edgex = x + slice_width
             i += 1
-    slices_with_rmasks = zip(slices, slice_rmasks)
+    slices_with_rmasks = zip(slices, slice_rmasks, slice_imasks)
     return slices_with_rmasks
 
 
@@ -2874,25 +2929,27 @@ try:
                 progress_image = 'progress.png'
             # grab the init image and make it our progress image
             if cl_args.gobiginit is not None:
-                shutil.copy(init_image, progress_image)                
+                    shutil.copy(init_image, progress_image)                
             # Setup some filenames
             if cl_args.cuda != '0':  # handle if a different GPU is in use
                 slice_image = (f'slice{cl_args.cuda}.png')
+                slice_imask = (f'slice_imask{cl_args.cuda}.png')
                 slice_rmask = (f'slice_rmask{cl_args.cuda}.png')
                 final_output_image = (f'{batchFolder}/{batch_name}_go_big_{cl_args.cuda}_{batchNum}_{batch_image}.png')
             else:
-
                 slice_image = 'slice.png'
+                slice_imask = 'slice_imask.png'
                 slice_rmask = 'slice_rmask.png'
                 final_output_image = (f'{batchFolder}/{batch_name}_go_big_{batchNum}_{batch_image}.png')
 
             # To keep things simple (hah), we'll create a fully white render_mask to use in the case that there's no provided render_mask
             # that way there's going to be a render_mask no matter what, and we don't have to keep checking for it
-            # And just to keep everyone on their toes, a render_mask is is for telling do_run where to render/not render, while a mask is for gobig to blend slices
-            if render_mask is None:
-                source_render_mask = Image.new('RGBA', (args.side_x, args.side_y), color = (255,255,255))
-            else:
+            # And just to keep everyone on their toes, a render_mask is is for telling do_run where to render/not render, while a mask is for gobig to blend slices, and an init_mask is what to render against when rendering with an rmask -- got it?
+            if render_mask is not None:
                 source_render_mask = Image.open(render_mask).convert('RGBA')
+            else:
+                #source_render_mask = Image.new('RGBA', (args.side_x, args.side_y), color = (255,255,255))
+                source_render_mask = None
 
             # Resize init if needed, as well as any render mask. For now we assume the render mask matches the size of the init.
             if cl_args.gobiginit_scaled == False:
@@ -2901,16 +2958,21 @@ try:
                 reside_y = side_y * gobig_scale
                 source_image = input_image.resize((reside_x, reside_y), get_resampling_mode())
                 input_image.close()
-                source_render_mask = source_render_mask.resize((reside_x, reside_y), get_resampling_mode())
+                if source_render_mask is not None:
+                    source_render_mask = source_render_mask.resize((reside_x, reside_y), get_resampling_mode())
             else:
                 source_image = Image.open(progress_image).convert('RGBA')
-            
+            if init_masked is not None:
+                source_imask = Image.open(init_masked).convert('RGBA')
+                source_imask = source_imask.resize(source_image.size, get_resampling_mode()) # TODO if this works then do the source_render_mask the same way
+            else:
+                source_imask = None
             # Slice source_image into overlapping slices
-            slices = slice(source_image, source_render_mask)
+            slices = slice(source_image, source_render_mask, source_imask)
             # Run PRD again for each slice, with proper init image paramaters, etc.
             i = 1  # just to number the slices as they save
             betterslices = []
-            for chunk, chunk_rmask in slices:
+            for chunk, chunk_rmask, chunk_imask in slices:
                 seed = seed + 1
                 args.seed = seed
                 # Reset underlying systems for another run
@@ -2928,11 +2990,18 @@ try:
                         torch.cuda.empty_cache()
                 # Some original values need to be adjusted for go_big to work properly
                 chunk.save(slice_image)
-                chunk_rmask.save(slice_rmask)
+                if chunk_rmask is not None:
+                    chunk_rmask.save(slice_rmask)
+                if chunk_imask is not None:
+                    chunk_imask.save(slice_imask)
                 args.init_image = slice_image
                 init_image = slice_image
-                args.render_mask = slice_rmask
-                render_mask = slice_rmask
+                if chunk_rmask is not None:
+                    args.render_mask = slice_rmask
+                    render_mask = slice_rmask
+                if chunk_imask is not None:
+                    init_masked = slice_imask
+                    args.init_masked = slice_imask
                 args.symmetry_loss_v = False
                 args.symmetry_loss_h = False
                 args.perlin_init = False

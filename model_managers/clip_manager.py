@@ -60,6 +60,7 @@ class ClipManager:
             name: str,
             cut_count_multiplier: int,
             device,
+            download_root: str,
             use_cut_heatmap=False,
             pad_inner_cuts=False,
             cutout_debug_image_dir='cutout_debug_images'
@@ -74,6 +75,7 @@ class ClipManager:
         self.use_cut_heatmap = use_cut_heatmap
         self.pad_inner_cuts = pad_inner_cuts
         self.cutout_debug_image_dir=cutout_debug_image_dir
+        self.download_root=download_root
 
     @staticmethod
     def parse_prompt(prompt, vars={}):
@@ -92,7 +94,8 @@ class ClipManager:
                 self.model = clip.load(
                     CLIP_NAME_MAP[self.name],
                     jit=False,
-                    device=self.device
+                    device=self.device,
+                    download_root=self.download_root
                 )[0].eval().requires_grad_(False)
 
         if type(CLIP_NAME_MAP[self.name]) == list: #Open_Clip model
