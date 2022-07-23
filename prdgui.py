@@ -34,8 +34,8 @@ def save_text():
     for key, value in json_set.items():
         json_set['text_prompts']['0'][0] = prompt_text.get()
         files = [('JSON File', '*.json')]
-        fileName='Derp'
-        filepos = asksaveasfile(filetypes = files,defaultextension = json,initialfile='Derp')
+        fileName='settings'
+        filepos = asksaveasfile(filetypes = files,defaultextension = json,initialfile='settings')
         writeToJSONFile(filepos, fileName, json_set)
         
 def do_run():
