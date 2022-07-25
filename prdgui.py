@@ -142,7 +142,7 @@ prompt2.grid(row=3, column=0, pady=5, padx=2, sticky=NW)
 if len(json_set['text_prompts']['0']) > 1:
     prompt_text2 = Entry(frame3, textvariable=get_prompt(1), width=150)
 else:
-    prompt_text2 = Entry(frame3, textvariable='', width=161)
+    prompt_text2 = Entry(frame3, textvariable='', width=150)
 prompt_text2.grid(row=4, column=0, pady=5, padx=2, sticky=NW)
 
 prompt3 = Label(frame3, text='Prompt 3')
@@ -150,7 +150,7 @@ prompt3.grid(row=5, column=0, pady=5, padx=2, sticky=NW)
 if len(json_set['text_prompts']['0']) > 2:
     prompt_text3 = Entry(frame3, textvariable=get_prompt(2), width=150)
 else:
-    prompt_text3 = Entry(frame3, textvariable='', width=161)
+    prompt_text3 = Entry(frame3, textvariable='', width=150)
 prompt_text3.grid(row=6, column=0, pady=5, padx=2, sticky=NW)
 
 prompt4 = Label(frame3, text='Prompt 4')
@@ -158,7 +158,7 @@ prompt4.grid(row=7, column=0, pady=5, padx=2, sticky=NW)
 if len(json_set['text_prompts']['0']) > 3:
     prompt_text4 = Entry(frame3, textvariable=get_prompt(3), width=150)
 else:
-    prompt_text4 = Entry(frame3, textvariable='', width=161)
+    prompt_text4 = Entry(frame3, textvariable='', width=150)
 prompt_text4.grid(row=8, column=0, pady=5, padx=2, sticky=NW)
 
 steps = Label(frame1, text='Steps:')
@@ -286,17 +286,17 @@ sampling_mode_text = get_text('sampling_mode')
 sampling_mode_drop = OptionMenu(frame1, sampling_mode_text, 'ddim', 'plms')
 sampling_mode_drop.grid(row=2, column=5, pady=5, padx=2, sticky=NW)
 
-batch_name = Label(frame2, text='Batch Name:')
-batch_name.grid(row=5, column=4, pady=5, padx=2, sticky=NW)
+batch_name = Label(frame1, text='Batch Name:')
+batch_name.grid(row=2, column=6, pady=5, padx=2, sticky=NW)
 
-batch_name_text = Entry(frame2, textvariable=get_text('batch_name'), width=10)
-batch_name_text.grid(row=5, column=5, pady=5, padx=2, sticky=NW)
+batch_name_text = Entry(frame1, textvariable=get_text('batch_name'), width=10)
+batch_name_text.grid(row=2, column=7, pady=5, padx=2, sticky=NW)
 
-n_batches = Label(frame2, text='Number of Batches:')
-n_batches.grid(row=4, column=6, pady=5, padx=2, sticky=NW)
+n_batches = Label(frame1, text='Number of Batches:')
+n_batches.grid(row=3, column=6, pady=5, padx=2, sticky=NW)
 
-n_batches_text = Entry(frame2, textvariable=get_text('n_batches'), width=12)
-n_batches_text.grid(row=4, column=7, pady=5, padx=2, sticky=NW)
+n_batches_text = Entry(frame1, textvariable=get_text('n_batches'), width=12)
+n_batches_text.grid(row=3, column=7, pady=5, padx=2, sticky=NW)
 
 diffusion_model = Label(frame1, text='Diffusion Model:')
 diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
@@ -311,8 +311,8 @@ set_seed.grid(row=3, column=4, pady=5, padx=2, sticky=NW)
 set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=12)
 set_seed_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
 
-save = Button(frame2,text='Save Settings', command=save_text).grid(row=5, column=6)
-run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=7)
+save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=6)
+run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=6)
 
 window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
 
