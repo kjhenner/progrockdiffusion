@@ -827,7 +827,6 @@ print('')
 width_height = [width_height[0] * width_height_scale, width_height[1] * width_height_scale]
 
 if symmetry_loss_v or symmetry_loss_h:
-    #symm_switch = 100.*(1. - (symm_switch/steps))
     print(f"Symmetry will end at step {symm_switch}")
 
 # Now override some depending on command line and maybe a special case
@@ -839,9 +838,27 @@ if cl_args.ignoreseed:
     set_seed = 'random_seed'
     print(f'Using a random seed instead of the one provided by the JSON file.')
 
-if cl_args.hidemetadata:
+try:
+    environ_hidemetadata = os.environ.get('PRD_HIDE_METADATA')
+except:
+    environ_hidemetadata = False
+
+if cl_args.hidemetadata or environ_hidemetadata:
     add_metadata = False
     print(f'Hide metadata flag is ON, settings will not be stored in the PNG output.')
+
+# # Use PRD's model folder to store CLIP models if CLIP_MODEL_CACHE environment variable is set to False.
+# try:
+#     environ_clip_model_cache = os.environ.get('CLIP_MODEL_CACHE')
+# except:
+#     environ_clip_model_cache = None
+
+# if environ_clip_model_cache is not None:
+#     clip_model_path = model_path
+# else:
+#     clip_model_path = "~/.cache/clip"
+
+# print(f'Clip model path is {clip_model_path}')
 
 gui = False
 if cl_args.gui:
@@ -1222,13 +1239,17 @@ def create_perlin_noise(octaves=[1, 1, 1, 1], width=2, height=2, grayscale=True)
         out = TF.resize(size=(side_y, side_x), img=out)
         out = TF.to_pil_image(out.clamp(0, 1).squeeze())
 
-    out = ImageOps.autocontrast(out, preserve_tone=True)
-    out2 = ImageEnhance.Contrast(out)
-    out3 = out2.enhance(perlin_contrast)
-    out4 = ImageEnhance.Brightness(out3)
-    del out2
-    del out3
-    return out4.enhance(perlin_brightness)
+    # out = ImageOps.autocontrast(out, preserve_tone=True)
+    out = ImageOps.autocontrast(out)
+    if perlin_contrast != 1.0:
+        out2 = ImageEnhance.Contrast(out)
+        out3 = out2.enhance(perlin_contrast)
+        out = out3
+    if perlin_brightness != 1.0:
+        out2 = ImageEnhance.Brightness(out)
+        out3 = out2.enhance(perlin_brightness)
+        out = out3
+    return out
 
 
 def gen_perlin():
@@ -2331,8 +2352,7 @@ clip_managers = [
         cut_count_multiplier=eval(model_name),
         device=device,
         use_cut_heatmap=True,
-        pad_inner_cuts=True,
-        download_root=model_path
+        pad_inner_cuts=True
     )
     for model_name in CLIP_NAME_MAP.keys() if eval(model_name)
 ]
@@ -2851,8 +2871,6 @@ def addalpha(im, mask):
     return(im)
 
 # take a source image and layer in the slices on top
-
-
 def mergeimgs(source, slices):
     global slices_todo
     source.convert("RGBA")
@@ -2902,6 +2920,22 @@ def slice(source, rmask, imask):
             i += 1
     slices_with_rmasks = zip(slices, slice_rmasks, slice_imasks)
     return slices_with_rmasks
+
+# # Alternative method uses a grid of images that each equal the size of the original render
+# def grid_slice(source, rmask, imask, og_size):
+#     overlap = 64
+#     width, height = og_size
+#     canvas_width, canvas_height = source.size
+#     # loc_width and loc_height are the center point of the goal size, and we'll start there and work our way out
+#     loc_width = int(canvas_width / 2)
+#     loc_height = int(canvas_height / 2)
+#     slices = []
+#     grid_in_progress = True
+#     while grid_in_progress == True:
+#         #first slice is in the center, this calculates where its 0,0 position will be
+#         slicex = (loc_width - int(width / 2)) + overlap
+#         slicey = (loc_height - int(height / 2)) + overlap
+        
 
 
 # FINALLY DO THE RUN
