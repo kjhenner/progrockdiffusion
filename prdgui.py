@@ -1,6 +1,6 @@
 from tkinter import *
 import os
-import json
+import json5 as json
 import threading
 from PIL import ImageTk,Image
 
