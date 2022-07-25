@@ -24,11 +24,11 @@ def get_text(derp):
         text.set(json_set[derp])
         return text
 
-def get_prompt():
+def get_prompt(x):
     for key in json_set.items():
-        json_set['text_prompts']['0'][0] = json_set['text_prompts']['0'][0].replace('{','')
+        json_set['text_prompts']['0'][x] = json_set['text_prompts']['0'][x].replace('{','')
         text = StringVar()
-        text.set(json_set['text_prompts']['0'][0])
+        text.set(json_set['text_prompts']['0'][x])
         return text
 
 path = './'
@@ -83,7 +83,8 @@ def save_text():
     json_set['display_rate'] = int(float(x))
     x = diffusion_model_text.get()
     json_set['diffusion_model'] = x
-    json_set['text_prompts']['0'][0] = prompt_text.get()
+    prompt_text = [prompt_text1.get(), prompt_text2.get(), prompt_text3.get(), prompt_text4.get()]
+    json_set['text_prompts']['0'] = prompt_text
     with open("gui_settings.json", "w") as outfile:
         json.dump(json_set, outfile)
 
@@ -133,14 +134,41 @@ left_frame.grid(row=0, column=0, sticky=NSEW)
 frame1 = Frame(left_frame, bg='Light Green', bd=2, relief=FLAT)
 frame1.grid(row=1, column=0, sticky=NW)
 
-frame2 = Frame(left_frame, bg='Light Blue', bd=2, relief=FLAT)
-frame2.grid(row=4, column=0, sticky=NW) 
+frame2 = Frame(left_frame, bg='Light Yellow', bd=2, relief=FLAT)
+frame2.grid(row=2, column=0, sticky=NW)
 
-prompt = Label(frame2, text='Prompt:')
-prompt.grid(row=1, column=0, pady=5, padx=2, sticky=NW)
+frame3 = Frame(left_frame, bg='Light Blue', bd=2, relief=FLAT)
+frame3.grid(row=3, column=0, sticky=NW) 
 
-prompt_text = Entry(frame2, textvariable=get_prompt(), width=161)
-prompt_text.grid(row=2, column=0, pady=5, padx=2, sticky=NW)
+prompt1 = Label(frame3, text='Prompt 1')
+prompt1.grid(row=1, column=0, pady=5, padx=2, sticky=NW)
+
+prompt_text1 = Entry(frame3, textvariable=get_prompt(0), width=150)
+prompt_text1.grid(row=2, column=0, pady=5, padx=2, sticky=NW)
+
+prompt2 = Label(frame3, text='Prompt 2')
+prompt2.grid(row=3, column=0, pady=5, padx=2, sticky=NW)
+if len(json_set['text_prompts']['0']) > 1:
+    prompt_text2 = Entry(frame3, textvariable=get_prompt(1), width=150)
+else:
+    prompt_text2 = Entry(frame3, textvariable='', width=161)
+prompt_text2.grid(row=4, column=0, pady=5, padx=2, sticky=NW)
+
+prompt3 = Label(frame3, text='Prompt 3')
+prompt3.grid(row=5, column=0, pady=5, padx=2, sticky=NW)
+if len(json_set['text_prompts']['0']) > 2:
+    prompt_text3 = Entry(frame3, textvariable=get_prompt(2), width=150)
+else:
+    prompt_text3 = Entry(frame3, textvariable='', width=161)
+prompt_text3.grid(row=6, column=0, pady=5, padx=2, sticky=NW)
+
+prompt4 = Label(frame3, text='Prompt 4')
+prompt4.grid(row=7, column=0, pady=5, padx=2, sticky=NW)
+if len(json_set['text_prompts']['0']) > 3:
+    prompt_text4 = Entry(frame3, textvariable=get_prompt(3), width=150)
+else:
+    prompt_text4 = Entry(frame3, textvariable='', width=161)
+prompt_text4.grid(row=8, column=0, pady=5, padx=2, sticky=NW)
 
 steps = Label(frame1, text='Steps:')
 steps.grid(row=1, column=0, pady=5, padx=2, sticky=NW)
@@ -184,20 +212,18 @@ eta.grid(row=3, column=0, pady=5, padx=2, sticky=NW)
 eta_text = Entry(frame1, textvariable=get_text('eta'), width=8)
 eta_text.grid(row=3, column=1, pady=5, padx=2, sticky=NW)
 
-use_secondary_model = Label(frame1, text='Use Secondary Model:')
-use_secondary_model.grid(row=3, column=2, pady=5, padx=2, sticky=NW)
-
-use_secondary_model_text = Entry(frame1, textvariable=get_text('use_secondary_model'), width=8)
-use_secondary_model_text.grid(row=3, column=3, pady=5, padx=2, sticky=NW)
+use_secondary_model_text = get_num('use_secondary_model')
+use_secondary_model = Checkbutton(frame2, text='Use Secondary Model', variable=use_secondary_model_text)
+use_secondary_model.grid(row=4, column=5, pady=5, padx=2, sticky=NW)
 
 display_rate = Label(frame1, text='Display Rate:')
-display_rate.grid(row=3, column=4, pady=5, padx=2, sticky=NW)
+display_rate.grid(row=3, column=2, pady=5, padx=2, sticky=NW)
 
 display_rate_text = Entry(frame1, textvariable=get_text('display_rate'), width=12)
-display_rate_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
+display_rate_text.grid(row=3, column=3, pady=5, padx=2, sticky=NW)
 
 vitb32_text = get_num('ViTB32')
-vitb32_check = Checkbutton(frame1, text='ViTB32', variable=vitb32_text)
+vitb32_check = Checkbutton(frame2, text='ViTB32', variable=vitb32_text)
 if vitb32_text.get() == 1:
     vitb32_check.select()
 else:
@@ -205,7 +231,7 @@ else:
 vitb32_check.grid(row=4, column=0, pady=5, padx=2, sticky=NW)
 
 vitb16_text = get_num('ViTB16')
-vitb16_check = Checkbutton(frame1, text='ViTB16', variable=vitb16_text)
+vitb16_check = Checkbutton(frame2, text='ViTB16', variable=vitb16_text)
 if vitb16_text.get() == 1:
     vitb16_check.select()
 else:
@@ -213,7 +239,7 @@ else:
 vitb16_check.grid(row=4, column=1, pady=5, padx=2, sticky=NW)
 
 vitl14_text = get_num('ViTL14')
-vitl14_check = Checkbutton(frame1, text='ViTL14', variable=vitl14_text)
+vitl14_check = Checkbutton(frame2, text='ViTL14', variable=vitl14_text)
 if vitl14_text.get() == 1:
     vitl14_check.select()
 else:
@@ -221,7 +247,7 @@ else:
 vitl14_check.grid(row=4, column=2, pady=5, padx=2, sticky=NW)
 
 vitl14_336_text = get_num('ViTL14_336')
-vitl14_336_check = Checkbutton(frame1, text='ViTL14_336', variable=vitl14_336_text)
+vitl14_336_check = Checkbutton(frame2, text='ViTL14_336', variable=vitl14_336_text)
 if vitl14_336_text.get() == 1:
     vitl14_336_check.select()
 else:
@@ -229,7 +255,7 @@ else:
 vitl14_336_check.grid(row=4, column=3, pady=5, padx=2, sticky=NW)
 
 rn101_text = get_num('RN101')
-rn101_check = Checkbutton(frame1, text='RN101', variable=rn101_text)
+rn101_check = Checkbutton(frame2, text='RN101', variable=rn101_text)
 if rn101_text.get() == 1:
     rn101_check.select()
 else:
@@ -237,7 +263,7 @@ else:
 rn101_check.grid(row=4, column=4, pady=5, padx=2, sticky=NW)
 
 rn50_text = get_num('RN50')
-rn50_check = Checkbutton(frame1, text='RN50', variable=rn50_text)
+rn50_check = Checkbutton(frame2, text='RN50', variable=rn50_text)
 if rn50_text.get() == 1:
     rn50_check.select()
 else:
@@ -245,7 +271,7 @@ else:
 rn50_check.grid(row=5, column=0, pady=5, padx=2, sticky=NW)
 
 rn50x4_text = get_num('RN50x4')
-rn50x4_check = Checkbutton(frame1, text='RN50x4', variable=rn50x4_text)
+rn50x4_check = Checkbutton(frame2, text='RN50x4', variable=rn50x4_text)
 if rn50x4_text.get() == 1:
     rn50x4_check.select()
 else:
@@ -253,7 +279,7 @@ else:
 rn50x4_check.grid(row=5, column=1, pady=5, padx=2, sticky=NW)
 
 rn50x16_text = get_num('RN50x16')
-rn50x16_check = Checkbutton(frame1, text='RN50x16', variable=rn50x16_text)
+rn50x16_check = Checkbutton(frame2, text='RN50x16', variable=rn50x16_text)
 if rn50x16_text.get() == 1:
     rn50x16_check.select()
 else:
@@ -261,7 +287,7 @@ else:
 rn50x16_check.grid(row=5, column=2, pady=5, padx=2, sticky=NW)
 
 rn50x64_text = get_num('RN50x64')
-rn50x64_check = Checkbutton(frame1, text='RN50x64', variable=rn50x64_text)
+rn50x64_check = Checkbutton(frame2, text='RN50x64', variable=rn50x64_text)
 if rn50x64_text.get() == 1:
     rn50x64_check.select()
 else:
@@ -275,16 +301,16 @@ sampling_mode_text = get_text('sampling_mode')
 sampling_mode_drop = OptionMenu(frame1, sampling_mode_text, 'ddim', 'plms')
 sampling_mode_drop.grid(row=2, column=7, pady=5, padx=2, sticky=NW)
 
-batch_name = Label(frame1, text='Batch Name:')
+batch_name = Label(frame2, text='Batch Name:')
 batch_name.grid(row=5, column=4, pady=5, padx=2, sticky=NW)
 
-batch_name_text = Entry(frame1, textvariable=get_text('batch_name'), width=10)
+batch_name_text = Entry(frame2, textvariable=get_text('batch_name'), width=10)
 batch_name_text.grid(row=5, column=5, pady=5, padx=2, sticky=NW)
 
-n_batches = Label(frame1, text='Number of Batches:')
+n_batches = Label(frame2, text='Number of Batches:')
 n_batches.grid(row=4, column=6, pady=5, padx=2, sticky=NW)
 
-n_batches_text = Entry(frame1, textvariable=get_text('n_batches'), width=12)
+n_batches_text = Entry(frame2, textvariable=get_text('n_batches'), width=12)
 n_batches_text.grid(row=4, column=7, pady=5, padx=2, sticky=NW)
 
 diffusion_model = Label(frame1, text='Diffusion Model:')
@@ -295,13 +321,13 @@ diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusi
 diffusion_model_drop.grid(row=1, column=7, pady=5, padx=2, sticky=NW)
 
 set_seed = Label(frame1, text='Set Seed:')
-set_seed.grid(row=3, column=6, pady=5, padx=2, sticky=NW)
+set_seed.grid(row=3, column=4, pady=5, padx=2, sticky=NW)
 
 set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=12)
-set_seed_text.grid(row=3, column=7, pady=5, padx=2, sticky=NW)
+set_seed_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
 
-save = Button(frame1,text='Save Settings', command=save_text).grid(row=5, column=6)
-run = Button(frame1,text='Run', command=run_thread).grid(row=5, column=7)
+save = Button(frame2,text='Save Settings', command=save_text).grid(row=5, column=6)
+run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=7)
 
 window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
 
