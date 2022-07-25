@@ -139,7 +139,7 @@ frame2.grid(row=4, column=0, sticky=NW)
 prompt = Label(frame2, text='Prompt:')
 prompt.grid(row=1, column=0, pady=5, padx=2, sticky=NW)
 
-prompt_text = Entry(frame2, textvariable=get_prompt(), width=150)
+prompt_text = Entry(frame2, textvariable=get_prompt(), width=161)
 prompt_text.grid(row=2, column=0, pady=5, padx=2, sticky=NW)
 
 steps = Label(frame1, text='Steps:')
@@ -157,7 +157,7 @@ height_text.grid(row=1, column=3, pady=5, padx=2, sticky=NW)
 width = Label(frame1, text='Width:')
 width.grid(row=1, column=4, pady=5, padx=2, sticky=NW)
 
-width_text = Entry(frame1, textvariable=get_text('width'), width=8)
+width_text = Entry(frame1, textvariable=get_text('width'), width=12)
 width_text.grid(row=1, column=5, pady=5, padx=2, sticky=NW)
 
 clip_guidance_scale = Label(frame1, text='Clip Guidance Scale:')
@@ -175,7 +175,7 @@ skip_steps_text.grid(row=2, column=3, pady=5, padx=2, sticky=NW)
 skip_steps_ratio = Label(frame1, text='Skip Steps Ratio:')
 skip_steps_ratio.grid(row=2, column=4, pady=5, padx=2, sticky=NW)
 
-skip_steps_ratio_text = Entry(frame1, textvariable=get_text('skip_steps_ratio'), width=8)
+skip_steps_ratio_text = Entry(frame1, textvariable=get_text('skip_steps_ratio'), width=12)
 skip_steps_ratio_text.grid(row=2, column=5, pady=5, padx=2, sticky=NW)
 
 eta = Label(frame1, text='ETA:')
@@ -193,7 +193,7 @@ use_secondary_model_text.grid(row=3, column=3, pady=5, padx=2, sticky=NW)
 display_rate = Label(frame1, text='Display Rate:')
 display_rate.grid(row=3, column=4, pady=5, padx=2, sticky=NW)
 
-display_rate_text = Entry(frame1, textvariable=get_text('display_rate'), width=8)
+display_rate_text = Entry(frame1, textvariable=get_text('display_rate'), width=12)
 display_rate_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
 
 vitb32_text = get_num('ViTB32')
@@ -278,26 +278,26 @@ sampling_mode_drop.grid(row=2, column=7, pady=5, padx=2, sticky=NW)
 batch_name = Label(frame1, text='Batch Name:')
 batch_name.grid(row=5, column=4, pady=5, padx=2, sticky=NW)
 
-batch_name_text = Entry(frame1, textvariable=get_text('batch_name'), width=8)
+batch_name_text = Entry(frame1, textvariable=get_text('batch_name'), width=10)
 batch_name_text.grid(row=5, column=5, pady=5, padx=2, sticky=NW)
 
 n_batches = Label(frame1, text='Number of Batches:')
 n_batches.grid(row=4, column=6, pady=5, padx=2, sticky=NW)
 
-n_batches_text = Entry(frame1, textvariable=get_text('n_batches'), width=8)
+n_batches_text = Entry(frame1, textvariable=get_text('n_batches'), width=12)
 n_batches_text.grid(row=4, column=7, pady=5, padx=2, sticky=NW)
 
 diffusion_model = Label(frame1, text='Diffusion Model:')
 diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
 
 diffusion_model_text = get_text('diffusion_model')
-diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008100', '256x256_openai_comics_faces_by_alex_spirin_084000', '256x256_diffusion_uncond', 'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256', 'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion')
+diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120', '256x256_openai_comics_faces_by_alex_spirin_084000', '256x256_diffusion_uncond', 'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256', 'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion')
 diffusion_model_drop.grid(row=1, column=7, pady=5, padx=2, sticky=NW)
 
 set_seed = Label(frame1, text='Set Seed:')
 set_seed.grid(row=3, column=6, pady=5, padx=2, sticky=NW)
 
-set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=8)
+set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=12)
 set_seed_text.grid(row=3, column=7, pady=5, padx=2, sticky=NW)
 
 save = Button(frame1,text='Save Settings', command=save_text).grid(row=5, column=6)
