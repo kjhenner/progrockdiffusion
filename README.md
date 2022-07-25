@@ -122,10 +122,17 @@ You defnitely should install the GPU version if you have an NVIDIA card. It's al
 Otherwise, you can install the CPU version instead (required for MacOS)
 
 ### EITHER Install GPU accelerated PyTorch
+
+**[Linux]**
 ```
 pip install torch==1.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
 pip install torchvision==0.11.3+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
 pip install torchaudio==0.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+```
+
+**[Windows]**
+```
+conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
 ```
 
 ### OR install the basic CPU version of PyTorch (warning - very slow!)
