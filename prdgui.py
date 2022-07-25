@@ -12,6 +12,12 @@ if os.path.exists('gui_settings.json'):
 else:
     json_set = json.load(open('settings.json'))
 
+def get_num(derp):
+    for key in json_set.items():
+        num = IntVar()
+        num.set(json_set[derp])
+        return num
+
 def get_text(derp):
     for key in json_set.items():
         text = StringVar()
@@ -28,6 +34,10 @@ def get_prompt():
 path = './'
 
 def save_text():
+    x = batch_name_text.get()
+    json_set['batch_name'] = x
+    x = n_batches_text.get()
+    json_set['n_batches'] = int(float(x))
     x = steps_text.get()
     json_set['steps'] = int(x)
     x = height_text.get()
@@ -68,13 +78,13 @@ def save_text():
     x = sampling_mode_text.get()
     json_set['sampling_mode'] = x
     x = set_seed_text.get()
-    json_set['set_seed'] = int(float(x))
+    json_set['set_seed'] = x
     x = display_rate_text.get()
     json_set['display_rate'] = int(float(x))
     x = diffusion_model_text.get()
     json_set['diffusion_model'] = x
     json_set['text_prompts']['0'][0] = prompt_text.get()
-    with open("gui_settings.json", "w") as outfile: 
+    with open("gui_settings.json", "w") as outfile:
         json.dump(json_set, outfile)
 
 def run_thread():
@@ -186,59 +196,77 @@ display_rate.grid(row=3, column=4, pady=5, padx=2, sticky=NW)
 display_rate_text = Entry(frame1, textvariable=get_text('display_rate'), width=8)
 display_rate_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
 
-vitb32 = Label(frame1, text='VitB32:')
-vitb32.grid(row=4, column=0, pady=5, padx=2, sticky=NW)
+vitb32_text = get_num('ViTB32')
+vitb32_check = Checkbutton(frame1, text='ViTB32', variable=vitb32_text)
+if vitb32_text.get() == 1:
+    vitb32_check.select()
+else:
+    vitb32_check.deselect()
+vitb32_check.grid(row=4, column=0, pady=5, padx=2, sticky=NW)
 
-vitb32_text = Entry(frame1, textvariable=get_text('ViTB32'), width=8)
-vitb32_text.grid(row=4, column=1, pady=5, padx=2, sticky=NW)
+vitb16_text = get_num('ViTB16')
+vitb16_check = Checkbutton(frame1, text='ViTB16', variable=vitb16_text)
+if vitb16_text.get() == 1:
+    vitb16_check.select()
+else:
+    vitb16_check.deselect()
+vitb16_check.grid(row=4, column=1, pady=5, padx=2, sticky=NW)
 
-vitb16 = Label(frame1, text='VitB16:')
-vitb16.grid(row=4, column=2, pady=5, padx=2, sticky=NW)
+vitl14_text = get_num('ViTL14')
+vitl14_check = Checkbutton(frame1, text='ViTL14', variable=vitl14_text)
+if vitl14_text.get() == 1:
+    vitl14_check.select()
+else:
+    vitl14_check.deselect()
+vitl14_check.grid(row=4, column=2, pady=5, padx=2, sticky=NW)
 
-vitb16_text = Entry(frame1, textvariable=get_text('ViTB16'), width=8)
-vitb16_text.grid(row=4, column=3, pady=5, padx=2, sticky=NW)
+vitl14_336_text = get_num('ViTL14_336')
+vitl14_336_check = Checkbutton(frame1, text='ViTL14_336', variable=vitl14_336_text)
+if vitl14_336_text.get() == 1:
+    vitl14_336_check.select()
+else:
+    vitl14_336_check.deselect()
+vitl14_336_check.grid(row=4, column=3, pady=5, padx=2, sticky=NW)
 
-vitl14 = Label(frame1, text='VitL14:')
-vitl14.grid(row=4, column=4, pady=5, padx=2, sticky=NW)
+rn101_text = get_num('RN101')
+rn101_check = Checkbutton(frame1, text='RN101', variable=rn101_text)
+if rn101_text.get() == 1:
+    rn101_check.select()
+else:
+    rn101_check.deselect()
+rn101_check.grid(row=4, column=4, pady=5, padx=2, sticky=NW)
 
-vitl14_text = Entry(frame1, textvariable=get_text('ViTL14'), width=8)
-vitl14_text.grid(row=4, column=5, pady=5, padx=2, sticky=NW)
+rn50_text = get_num('RN50')
+rn50_check = Checkbutton(frame1, text='RN50', variable=rn50_text)
+if rn50_text.get() == 1:
+    rn50_check.select()
+else:
+    rn50_check.deselect()
+rn50_check.grid(row=5, column=0, pady=5, padx=2, sticky=NW)
 
-vitl14_336 = Label(frame1, text='VitL14 336:')
-vitl14_336.grid(row=4, column=6, pady=5, padx=2, sticky=NW)
+rn50x4_text = get_num('RN50x4')
+rn50x4_check = Checkbutton(frame1, text='RN50x4', variable=rn50x4_text)
+if rn50x4_text.get() == 1:
+    rn50x4_check.select()
+else:
+    rn50x4_check.deselect()
+rn50x4_check.grid(row=5, column=1, pady=5, padx=2, sticky=NW)
 
-vitl14_336_text = Entry(frame1, textvariable=get_text('ViTL14_336'), width=8)
-vitl14_336_text.grid(row=4, column=7, pady=5, padx=2, sticky=NW)
+rn50x16_text = get_num('RN50x16')
+rn50x16_check = Checkbutton(frame1, text='RN50x16', variable=rn50x16_text)
+if rn50x16_text.get() == 1:
+    rn50x16_check.select()
+else:
+    rn50x16_check.deselect()
+rn50x16_check.grid(row=5, column=2, pady=5, padx=2, sticky=NW)
 
-rn101 = Label(frame1, text='RN101:')
-rn101.grid(row=8, column=0, pady=5, padx=2, sticky=NW)
-
-rn101_text = Entry(frame1, textvariable=get_text('RN101'), width=8)
-rn101_text.grid(row=8, column=1, pady=5, padx=2, sticky=NW)
-
-rn50 = Label(frame1, text='RN50:') 
-rn50.grid(row=7, column=0, pady=5, padx=2, sticky=NW)
-
-rn50_text = Entry(frame1, textvariable=get_text('RN50'), width=8)
-rn50_text.grid(row=7, column=1, pady=5, padx=2, sticky=NW)
-
-rn50x4 = Label(frame1, text='RN50x4:')
-rn50x4.grid(row=7, column=2, pady=5, padx=2, sticky=NW)
-
-rn50x4_text = Entry(frame1, textvariable=get_text('RN50x4'), width=8)
-rn50x4_text.grid(row=7, column=3, pady=5, padx=2, sticky=NW)
-
-rn50x16 = Label(frame1, text='RN50x16:')
-rn50x16.grid(row=7, column=4, pady=5, padx=2, sticky=NW)
-
-rn50x16_text = Entry(frame1, textvariable=get_text('RN50x16'), width=8)
-rn50x16_text.grid(row=7, column=5, pady=5, padx=2, sticky=NW)
-
-rn50x64 = Label(frame1, text='RN50x64:')
-rn50x64.grid(row=7, column=6, pady=5, padx=2, sticky=NW)
-
-rn50x64_text = Entry(frame1, textvariable=get_text('RN50x64'), width=8)
-rn50x64_text.grid(row=7, column=7, pady=5, padx=2, sticky=NW)
+rn50x64_text = get_num('RN50x64')
+rn50x64_check = Checkbutton(frame1, text='RN50x64', variable=rn50x64_text)
+if rn50x64_text.get() == 1:
+    rn50x64_check.select()
+else:
+    rn50x64_check.deselect()
+rn50x64_check.grid(row=5, column=3, pady=5, padx=2, sticky=NW)
 
 sampling_mode = Label(frame1, text='Sampling Mode:')
 sampling_mode.grid(row=2, column=6, pady=5, padx=2, sticky=NW)
@@ -246,6 +274,18 @@ sampling_mode.grid(row=2, column=6, pady=5, padx=2, sticky=NW)
 sampling_mode_text = get_text('sampling_mode')
 sampling_mode_drop = OptionMenu(frame1, sampling_mode_text, 'ddim', 'plms')
 sampling_mode_drop.grid(row=2, column=7, pady=5, padx=2, sticky=NW)
+
+batch_name = Label(frame1, text='Batch Name:')
+batch_name.grid(row=5, column=4, pady=5, padx=2, sticky=NW)
+
+batch_name_text = Entry(frame1, textvariable=get_text('batch_name'), width=8)
+batch_name_text.grid(row=5, column=5, pady=5, padx=2, sticky=NW)
+
+n_batches = Label(frame1, text='Number of Batches:')
+n_batches.grid(row=4, column=6, pady=5, padx=2, sticky=NW)
+
+n_batches_text = Entry(frame1, textvariable=get_text('n_batches'), width=8)
+n_batches_text.grid(row=4, column=7, pady=5, padx=2, sticky=NW)
 
 diffusion_model = Label(frame1, text='Diffusion Model:')
 diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
@@ -260,8 +300,8 @@ set_seed.grid(row=3, column=6, pady=5, padx=2, sticky=NW)
 set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=8)
 set_seed_text.grid(row=3, column=7, pady=5, padx=2, sticky=NW)
 
-save = Button(frame1,text='Save Settings', command=save_text).grid(row=1000, column=0)
-run = Button(frame1,text='Run', command=run_thread).grid(row=1000, column=1)
+save = Button(frame1,text='Save Settings', command=save_text).grid(row=5, column=6)
+run = Button(frame1,text='Run', command=run_thread).grid(row=5, column=7)
 
 window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
 
