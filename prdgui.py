@@ -51,8 +51,6 @@ def save_text():
         json_set['clip_guidance_scale'] = x
     x = skip_steps_text.get()
     json_set['skip_steps'] = int(x)
-    x = skip_steps_ratio_text.get()
-    json_set['skip_steps_ratio'] = float(x)
     x = use_secondary_model_text.get()
     json_set['use_secondary_model'] = x
     x = vitb32_text.get()
@@ -200,12 +198,6 @@ skip_steps.grid(row=2, column=2, pady=5, padx=2, sticky=NW)
 skip_steps_text = Entry(frame1, textvariable=get_text('skip_steps'), width=8)
 skip_steps_text.grid(row=2, column=3, pady=5, padx=2, sticky=NW)
 
-skip_steps_ratio = Label(frame1, text='Skip Steps Ratio:')
-skip_steps_ratio.grid(row=2, column=4, pady=5, padx=2, sticky=NW)
-
-skip_steps_ratio_text = Entry(frame1, textvariable=get_text('skip_steps_ratio'), width=12)
-skip_steps_ratio_text.grid(row=2, column=5, pady=5, padx=2, sticky=NW)
-
 eta = Label(frame1, text='ETA:')
 eta.grid(row=3, column=0, pady=5, padx=2, sticky=NW)
 
@@ -295,11 +287,11 @@ else:
 rn50x64_check.grid(row=5, column=3, pady=5, padx=2, sticky=NW)
 
 sampling_mode = Label(frame1, text='Sampling Mode:')
-sampling_mode.grid(row=2, column=6, pady=5, padx=2, sticky=NW)
+sampling_mode.grid(row=2, column=4, pady=5, padx=2, sticky=NW)
 
 sampling_mode_text = get_text('sampling_mode')
 sampling_mode_drop = OptionMenu(frame1, sampling_mode_text, 'ddim', 'plms')
-sampling_mode_drop.grid(row=2, column=7, pady=5, padx=2, sticky=NW)
+sampling_mode_drop.grid(row=2, column=5, pady=5, padx=2, sticky=NW)
 
 batch_name = Label(frame2, text='Batch Name:')
 batch_name.grid(row=5, column=4, pady=5, padx=2, sticky=NW)
