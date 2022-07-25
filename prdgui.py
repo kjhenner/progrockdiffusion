@@ -1,13 +1,16 @@
 from tkinter import *
 import os
+from os.path import exists
 import json
 import threading
 from threading import Timer
 from tkinter.filedialog import asksaveasfile
 from PIL import ImageTk,Image
 
-json_set = json.load(open('settings.json'))
-# args = [steps_text, height_text, width_text, clip_guidance_scale_text, skip_steps_text, skip_steps_ratio_text, use_secondary_model, vitb32, vitb16, vitl14, vitl14_336, rn101, rn50, rn50x4, rn50x16, rn50x64]
+if os.path.exists('gui_settings.json'):
+    json_set = json.load(open('gui_settings.json'))
+else:
+    json_set = json.load(open('settings.json'))
 
 def get_text(derp):
     for key in json_set.items():
@@ -20,7 +23,6 @@ def get_prompt():
         json_set['text_prompts']['0'][0] = json_set['text_prompts']['0'][0].replace('{','')
         text = StringVar()
         text.set(json_set['text_prompts']['0'][0])
-        print(json_set['text_prompts']['0'][0])
         return text
 
 path = './'
@@ -64,16 +66,15 @@ def save_text():
     x = eta_text.get()
     json_set['eta'] = x
     x = sampling_mode_text.get()
-    
     json_set['sampling_mode'] = x
     x = set_seed_text.get()
-    json_set['set_seed'] = float(x)
+    json_set['set_seed'] = int(float(x))
     x = display_rate_text.get()
-    json_set['display_rate'] = float(x)
-    # x = diffusion_model_text.get()
-    # json_set['diffusion_model'] = x
+    json_set['display_rate'] = int(float(x))
+    x = diffusion_model_text.get()
+    json_set['diffusion_model'] = x
     json_set['text_prompts']['0'][0] = prompt_text.get()
-    with open("settings.json", "w") as outfile: 
+    with open("gui_settings.json", "w") as outfile: 
         json.dump(json_set, outfile)
 
 def run_thread():
@@ -83,13 +84,15 @@ def run_thread():
 
 def do_run():
     show_image()
-    os.system('python prd.py -s settings.json')
+    os.system('python prd.py -s gui_settings.json')
 
 def show_image():
-    print('shit should print')
-    image_window = Toplevel()
+    w = json_set['width']
+    h = json_set['height']
+    image_window = Frame(master_frame, width=w, height=h)
+    image_window.grid(row=0, column=100)
     global canvas
-    canvas = Canvas(image_window, height=1024, width=1024)
+    canvas = Canvas(image_window, width=w, height=h)
     global img
     global image_container
     img = PhotoImage(file="progress.png")
@@ -114,10 +117,13 @@ master_frame = Frame(bg='Light Blue', bd=3, relief=RIDGE)
 master_frame.grid(sticky=NSEW)
 master_frame.columnconfigure(0, weight=1)
 
-frame1 = Frame(master_frame, bg='Light Green', bd=2, relief=FLAT)
+left_frame = Frame(master_frame)
+left_frame.grid(row=0, column=0, sticky=NSEW)
+
+frame1 = Frame(left_frame, bg='Light Green', bd=2, relief=FLAT)
 frame1.grid(row=1, column=0, sticky=NW)
 
-frame2 = Frame(master_frame, bg='Red', bd=2, relief=FLAT)
+frame2 = Frame(left_frame, bg='Light Blue', bd=2, relief=FLAT)
 frame2.grid(row=4, column=0, sticky=NW) 
 
 prompt = Label(frame2, text='Prompt:')
@@ -193,22 +199,22 @@ vitb16_text = Entry(frame1, textvariable=get_text('ViTB16'), width=8)
 vitb16_text.grid(row=4, column=3, pady=5, padx=2, sticky=NW)
 
 vitl14 = Label(frame1, text='VitL14:')
-vitl14.grid(row=5, column=0, pady=5, padx=2, sticky=NW)
+vitl14.grid(row=4, column=4, pady=5, padx=2, sticky=NW)
 
 vitl14_text = Entry(frame1, textvariable=get_text('ViTL14'), width=8)
-vitl14_text.grid(row=5, column=1, pady=5, padx=2, sticky=NW)
+vitl14_text.grid(row=4, column=5, pady=5, padx=2, sticky=NW)
 
 vitl14_336 = Label(frame1, text='VitL14 336:')
-vitl14_336.grid(row=5, column=2, pady=5, padx=2, sticky=NW)
+vitl14_336.grid(row=4, column=6, pady=5, padx=2, sticky=NW)
 
 vitl14_336_text = Entry(frame1, textvariable=get_text('ViTL14_336'), width=8)
-vitl14_336_text.grid(row=5, column=3, pady=5, padx=2, sticky=NW)
+vitl14_336_text.grid(row=4, column=7, pady=5, padx=2, sticky=NW)
 
 rn101 = Label(frame1, text='RN101:')
-rn101.grid(row=6, column=0, pady=5, padx=2, sticky=NW)
+rn101.grid(row=8, column=0, pady=5, padx=2, sticky=NW)
 
 rn101_text = Entry(frame1, textvariable=get_text('RN101'), width=8)
-rn101_text.grid(row=6, column=1, pady=5, padx=2, sticky=NW)
+rn101_text.grid(row=8, column=1, pady=5, padx=2, sticky=NW)
 
 rn50 = Label(frame1, text='RN50:') 
 rn50.grid(row=7, column=0, pady=5, padx=2, sticky=NW)
@@ -223,31 +229,38 @@ rn50x4_text = Entry(frame1, textvariable=get_text('RN50x4'), width=8)
 rn50x4_text.grid(row=7, column=3, pady=5, padx=2, sticky=NW)
 
 rn50x16 = Label(frame1, text='RN50x16:')
-rn50x16.grid(row=8, column=0, pady=5, padx=2, sticky=NW)
+rn50x16.grid(row=7, column=4, pady=5, padx=2, sticky=NW)
 
 rn50x16_text = Entry(frame1, textvariable=get_text('RN50x16'), width=8)
-rn50x16_text.grid(row=8, column=1, pady=5, padx=2, sticky=NW)
+rn50x16_text.grid(row=7, column=5, pady=5, padx=2, sticky=NW)
 
 rn50x64 = Label(frame1, text='RN50x64:')
-rn50x64.grid(row=8, column=2, pady=5, padx=2, sticky=NW)
+rn50x64.grid(row=7, column=6, pady=5, padx=2, sticky=NW)
 
 rn50x64_text = Entry(frame1, textvariable=get_text('RN50x64'), width=8)
-rn50x64_text.grid(row=8, column=3, pady=5, padx=2, sticky=NW)
+rn50x64_text.grid(row=7, column=7, pady=5, padx=2, sticky=NW)
 
 sampling_mode = Label(frame1, text='Sampling Mode:')
-sampling_mode.grid(row=9, column=0, pady=5, padx=2, sticky=NW)
+sampling_mode.grid(row=2, column=6, pady=5, padx=2, sticky=NW)
 
-sampling_mode_text = Entry(frame1, textvariable=get_text('sampling_mode'), width=8)
-sampling_mode_text.grid(row=9, column=1, pady=5, padx=2, sticky=NW)
+sampling_mode_text = get_text('sampling_mode')
+sampling_mode_drop = OptionMenu(frame1, sampling_mode_text, 'ddim', 'plms')
+sampling_mode_drop.grid(row=2, column=7, pady=5, padx=2, sticky=NW)
+
+diffusion_model = Label(frame1, text='Diffusion Model:')
+diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
+
+diffusion_model_text = get_text('diffusion_model')
+diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008100', '256x256_openai_comics_faces_by_alex_spirin_084000', '256x256_diffusion_uncond', 'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256', 'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion')
+diffusion_model_drop.grid(row=1, column=7, pady=5, padx=2, sticky=NW)
 
 set_seed = Label(frame1, text='Set Seed:')
-set_seed.grid(row=9, column=2, pady=5, padx=2, sticky=NW)
+set_seed.grid(row=3, column=6, pady=5, padx=2, sticky=NW)
 
 set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=8)
-set_seed_text.grid(row=9, column=3, pady=5, padx=2, sticky=NW)
+set_seed_text.grid(row=3, column=7, pady=5, padx=2, sticky=NW)
 
 save = Button(frame1,text='Save Settings', command=save_text).grid(row=1000, column=0)
-
 run = Button(frame1,text='Run', command=run_thread).grid(row=1000, column=1)
 
 window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
