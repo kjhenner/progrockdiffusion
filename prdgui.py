@@ -1,10 +1,7 @@
 from tkinter import *
 import os
-from os.path import exists
 import json
 import threading
-from threading import Timer
-from tkinter.filedialog import asksaveasfile
 from PIL import ImageTk,Image
 
 if os.path.exists('gui_settings.json'):
@@ -13,23 +10,19 @@ else:
     json_set = json.load(open('settings.json'))
 
 def get_num(derp):
-    for key in json_set.items():
-        num = IntVar()
-        num.set(json_set[derp])
-        return num
+    num = IntVar()
+    num.set(json_set[derp])
+    return num
 
 def get_text(derp):
-    for key in json_set.items():
-        text = StringVar()
-        text.set(json_set[derp])
-        return text
+    text = StringVar()
+    text.set(json_set[derp])
+    return text
 
 def get_prompt(x):
-    for key in json_set.items():
-        json_set['text_prompts']['0'][x] = json_set['text_prompts']['0'][x].replace('{','')
-        text = StringVar()
-        text.set(json_set['text_prompts']['0'][x])
-        return text
+    text = StringVar()
+    text.set(json_set['text_prompts']['0'][x])
+    return text
 
 path = './'
 
