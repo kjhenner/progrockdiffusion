@@ -1,5 +1,6 @@
 # progrockdiffusion
 A command line version of [Disco Diffusion](https://github.com/alembics/disco-diffusion).
+A GUI is available with a focused set of settings here: [GUI Instructions](#gui-instructions)
 
 Please consider supporting my time and effort in maintaining and improving this program on my [Patreon](https://www.patreon.com/jasonmhough?fan_landing=true). Thanks!
 
@@ -263,12 +264,12 @@ Settings.json is **always loaded**, and any specified after that are layered on 
 For example you could have a settings file that just contains a higher width, height, and more steps, for when you want to make a high-quality image.
 Layer that on top of your regular settings and it will apply those values without changing anything else.
 
-# GUI Instructions
+# [GUI Instructions](#gui-instructions)
 
 <img src="prdgui.png">
 
 Open up a command line window (shell) and activate the conda environment like normal, and then run prdgui.py.
-If you need help with the options go ahead and read the [settings file.](SETTINGS.md)
+Please read the [settings file](SETTINGS.md) if you are unfamiliar with PRD.
 
 ## [Windows]
 ```
