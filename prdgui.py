@@ -1,3 +1,4 @@
+from msilib.schema import CheckBox
 from tkinter import *
 import os
 import json5 as json
@@ -5,9 +6,16 @@ import threading
 from PIL import ImageTk,Image
 
 if os.path.exists('gui_settings.json'):
-    json_set = json.load(open('gui_settings.json'))
+    try:
+        json_set = json.load(open('gui_settings.json'))
+        print("GUI settings loaded")
+    except:
+        print("Error loading gui_settings.json")
+        print("Loading from settings.json...")
+        json_set = json.load(open('settings.json'))
 else:
     json_set = json.load(open('settings.json'))
+    print("Default settings loaded")
 
 def get_num(derp):
     num = IntVar()
@@ -74,7 +82,23 @@ def save_text():
     json_set['display_rate'] = int(float(x))
     x = diffusion_model_text.get()
     json_set['diffusion_model'] = x
-    prompt_text = [prompt_text1.get(), prompt_text2.get(), prompt_text3.get(), prompt_text4.get()]
+    x = symm_loss_scale_text.get()
+    json_set['symm_loss_scale'] = int(float(x))
+    x = symmetry_loss_v_text.get()
+    json_set['symmetry_loss_v'] = x
+    x = symmetry_loss_h_text.get()
+    json_set['symmetry_loss_h'] = x
+    x = symm_switch_text.get()
+    json_set['symm_switch'] = x
+    prompt_text = []
+    if prompt_text1.get() != '':
+        prompt_text.append(prompt_text1.get())
+    if prompt_text2.get() != '':
+        prompt_text.append(prompt_text2.get())
+    if prompt_text3.get() != '':
+        prompt_text.append(prompt_text3.get())
+    if prompt_text4.get() != '':
+        prompt_text.append(prompt_text4.get())
     json_set['text_prompts']['0'] = prompt_text
     with open("gui_settings.json", "w") as outfile:
         json.dump(json_set, outfile)
@@ -107,11 +131,14 @@ def updater():
 
 def refresh_image():
     updater()
-    global img
-    global image_container
-    global canvas
-    img = PhotoImage(file="progress.png")
-    canvas.itemconfig(image_container, image = img)
+    try:
+        global img
+        global image_container
+        global canvas
+        img = PhotoImage(file="progress.png")
+        canvas.itemconfig(image_container, image = img)
+    except:
+        pass
 
 window = Tk()
 
@@ -199,7 +226,7 @@ eta_text.grid(row=3, column=1, pady=5, padx=2, sticky=NW)
 
 use_secondary_model_text = get_num('use_secondary_model')
 use_secondary_model = Checkbutton(frame2, text='Use Secondary Model', variable=use_secondary_model_text)
-use_secondary_model.grid(row=4, column=5, pady=5, padx=2, sticky=NW)
+use_secondary_model.grid(row=5, column=4, pady=5, padx=2, sticky=NW)
 
 display_rate = Label(frame1, text='Display Rate:')
 display_rate.grid(row=3, column=2, pady=5, padx=2, sticky=NW)
@@ -302,7 +329,7 @@ diffusion_model = Label(frame1, text='Diffusion Model:')
 diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
 
 diffusion_model_text = get_text('diffusion_model')
-diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120', '256x256_openai_comics_faces_by_alex_spirin_084000', '256x256_diffusion_uncond', 'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256', 'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion')
+diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120', '256x256_openai_comics_faces_by_alex_spirin', '256x256_diffusion_uncond', 'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256', 'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion')
 diffusion_model_drop.grid(row=1, column=7, pady=5, padx=2, sticky=NW)
 
 set_seed = Label(frame1, text='Set Seed:')
@@ -311,8 +338,36 @@ set_seed.grid(row=3, column=4, pady=5, padx=2, sticky=NW)
 set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=12)
 set_seed_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
 
-save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=6)
-run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=6)
+symmetry_loss_v_text = get_num('symmetry_loss_v')
+symmetry_loss_v_check = Checkbutton(frame2, text='Vertical Symmetry', variable=symmetry_loss_v_text)
+if symmetry_loss_v_text.get() == 1:
+    symmetry_loss_v_check.select()
+else:
+    symmetry_loss_v_check.deselect()
+symmetry_loss_v_check.grid(row=4, column=8, pady=5, padx=2, sticky=NW)
+
+symmetry_loss_h_text = get_num('symmetry_loss_h')
+symmetry_loss_h_check = Checkbutton(frame2, text='Horizontal Symmetry', variable=symmetry_loss_h_text)
+if symmetry_loss_h_text.get() == 1:
+    symmetry_loss_h_check.select()
+else:
+    symmetry_loss_h_check.deselect()
+symmetry_loss_h_check.grid(row=5, column=8, pady=5, padx=2, sticky=NW)
+
+symm_loss_scale = Label(frame2, text='Symmetry Scale:')
+symm_loss_scale.grid(row=5, column=9, pady=5, padx=2, sticky=NW)
+
+symm_loss_scale_text = Entry(frame2, textvariable=get_text('symm_loss_scale'), width=12)
+symm_loss_scale_text.grid(row=5, column=10, pady=5, padx=2, sticky=NW)
+
+symm_switch = Label(frame2, text='Symmetry Switch:')
+symm_switch.grid(row=4, column=9, pady=5, padx=2, sticky=NW)
+
+symm_switch_text = Entry(frame2, textvariable=get_text('symm_switch'), width=12)
+symm_switch_text.grid(row=4, column=10, pady=5, padx=2, sticky=NW)
+
+save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=11, pady=5, padx=2)
+run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=11, pady=5, padx=2)
 
 window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
 
