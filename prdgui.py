@@ -330,17 +330,17 @@ set_seed.grid(row=3, column=4, pady=5, padx=2, sticky=NW)
 set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=12)
 set_seed_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
 
-symmetry_loss_v_text = get_text('symmetry_loss_v')
+symmetry_loss_v_text = get_num('symmetry_loss_v')
 symmetry_loss_v_check = Checkbutton(frame2, text='Vertical Symmetry', variable=symmetry_loss_v_text)
-if symmetry_loss_v_text.get() == 'true':
+if symmetry_loss_v_text.get() == 1:
     symmetry_loss_v_check.select()
 else:
     symmetry_loss_v_check.deselect()
 symmetry_loss_v_check.grid(row=4, column=8, pady=5, padx=2, sticky=NW)
 
-symmetry_loss_h_text = get_text('symmetry_loss_h')
+symmetry_loss_h_text = get_num('symmetry_loss_h')
 symmetry_loss_h_check = Checkbutton(frame2, text='Horizontal Symmetry', variable=symmetry_loss_h_text)
-if symmetry_loss_h_text.get() == 'true':
+if symmetry_loss_h_text.get() == 1:
     symmetry_loss_h_check.select()
 else:
     symmetry_loss_h_check.deselect()
