@@ -266,7 +266,7 @@ Layer that on top of your regular settings and it will apply those values withou
 
 # [GUI Instructions](#gui-instructions)
 
-<img src="prdgui.png">
+<img src="gui.png">
 
 Open up a command line window (shell) and activate the conda environment like normal, and then run prdgui.py.
 Please read the [settings file](SETTINGS.md) if you are unfamiliar with PRD.
