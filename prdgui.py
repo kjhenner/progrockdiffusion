@@ -90,7 +90,16 @@ def save_text():
     json_set['symmetry_loss_h'] = x
     x = symm_switch_text.get()
     json_set['symm_switch'] = x
-    prompt_text = [prompt_text1.get(), prompt_text2.get(), prompt_text3.get(), prompt_text4.get()]
+    prompt_text = []
+    if prompt_text1.get() != '':
+        prompt_text.append(prompt_text1.get())
+    if prompt_text2.get() != '':
+        prompt_text.append(prompt_text2.get())
+    if prompt_text3.get() != '':
+        prompt_text.append(prompt_text3.get())
+    if prompt_text4.get() != '':
+        prompt_text.append(prompt_text4.get())
+    print(prompt_text)
     json_set['text_prompts']['0'] = prompt_text
     with open("gui_settings.json", "w") as outfile:
         json.dump(json_set, outfile)
