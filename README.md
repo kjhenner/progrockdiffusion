@@ -262,7 +262,7 @@ Settings.json is **always loaded**, and any specified after that are layered on 
 For example you could have a settings file that just contains a higher width, height, and more steps, for when you want to make a high-quality image.
 Layer that on top of your regular settings and it will apply those values without changing anything else.
 
-# [GUI Instructions](#gui-instructions)
+# GUI Instructions
 
 <img src="gui.png">
 
