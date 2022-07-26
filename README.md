@@ -174,6 +174,8 @@ sudo apt-get install ffmpeg
 
 # Use
 
+If you are looking for the GUI instructions, click here: 
+
 NOTE: On your first run it might appear to hang. Let it go for a good while, though, as it might just be downloading models.
 Somtimes there is no feedback during the download process (why? Who knows)
 
@@ -260,6 +262,25 @@ Simply edit the settings.json file provided, or BETTER YET copy it and make seve
 Settings.json is **always loaded**, and any specified after that are layered on top (they only need to contain the settings you want to tweak).
 For example you could have a settings file that just contains a higher width, height, and more steps, for when you want to make a high-quality image.
 Layer that on top of your regular settings and it will apply those values without changing anything else.
+
+# GUI Instructions
+
+![]prdgui.png
+
+Open up a command line window (shell) and activate the conda environment like normal, and then run prdgui.py. The rest of the commands should be self explanatory.
+
+## [Windows]
+```
+conda activate progrockdiffusion
+cd progrockdiffusion
+python prdgui.py
+```
+## [Linux/MacOS]
+```
+conda activate progrockdiffusion
+cd progrockdiffusion
+python3 prdgui.py
+```
 
 # Tips and Troubleshooting
 ## Get a random artist
