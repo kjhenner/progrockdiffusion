@@ -1,111 +1,319 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtCore import QObject, QThread, QTimer, pyqtSignal
-from PIL import Image
-import sys
+from tkinter import *
+import os
+import json5 as json
+import threading
+from PIL import ImageTk,Image
 
+if os.path.exists('gui_settings.json'):
+    json_set = json.load(open('gui_settings.json'))
+else:
+    json_set = json.load(open('settings.json'))
 
-class Window(QMainWindow):
-    def __init__(self, worker_func, width, height):
-        super().__init__()
+def get_num(derp):
+    num = IntVar()
+    num.set(json_set[derp])
+    return num
 
-        self.acceptDrops()
+def get_text(derp):
+    text = StringVar()
+    text.set(json_set[derp])
+    return text
 
-        # set the title
-        self.setWindowTitle("progrockdiffusion")
+def get_prompt(x):
+    text = StringVar()
+    text.set(json_set['text_prompts']['0'][x])
+    return text
 
-        # setting  the geometry of window
-        self.setGeometry(500, 500, width, height)
+path = './'
 
-        # creating label
-        self.label = QLabel(self)
+def save_text():
+    x = batch_name_text.get()
+    json_set['batch_name'] = x
+    x = n_batches_text.get()
+    json_set['n_batches'] = int(float(x))
+    x = steps_text.get()
+    json_set['steps'] = int(x)
+    x = height_text.get()
+    json_set['height'] = int(x)
+    x = width_text.get()
+    json_set['width'] = int(x)
+    x = clip_guidance_scale_text.get()
+    if x != 'auto':
+        json_set['clip_guidance_scale'] = int(x)
+    else:
+        json_set['clip_guidance_scale'] = x
+    x = skip_steps_text.get()
+    json_set['skip_steps'] = int(x)
+    x = use_secondary_model_text.get()
+    json_set['use_secondary_model'] = x
+    x = vitb32_text.get()
+    json_set['ViTB32'] = float(x)
+    x = vitb16_text.get()
+    json_set['ViTB16'] = float(x)
+    x = vitl14_text.get()
+    json_set['ViTL14'] = float(x)
+    x = vitl14_336_text.get()
+    json_set['ViTL14_336'] = float(x)
+    x = rn101_text.get()
+    json_set['RN101'] = float(x)
+    x = rn50_text.get()
+    json_set['RN50'] = float(x)
+    x = rn50x4_text.get()
+    json_set['RN50x4'] = float(x)
+    x = rn50x16_text.get()
+    json_set['RN50x16'] = float(x)
+    x = rn50x64_text.get()
+    json_set['RN50x64'] = float(x)
+    x = eta_text.get()
+    json_set['eta'] = x
+    x = sampling_mode_text.get()
+    json_set['sampling_mode'] = x
+    x = set_seed_text.get()
+    json_set['set_seed'] = x
+    x = display_rate_text.get()
+    json_set['display_rate'] = int(float(x))
+    x = diffusion_model_text.get()
+    json_set['diffusion_model'] = x
+    prompt_text = [prompt_text1.get(), prompt_text2.get(), prompt_text3.get(), prompt_text4.get()]
+    json_set['text_prompts']['0'] = prompt_text
+    with open("gui_settings.json", "w") as outfile:
+        json.dump(json_set, outfile)
 
-        # loading image
-        self.pixmap = QPixmap(width, height)
+def run_thread():
+    save_text()
+    runThread = threading.Thread(target=do_run)
+    runThread.start()
 
-        # adding image to label
-        self.label.setPixmap(self.pixmap)
-        # self.label.setText('')
+def do_run():
+    show_image()
+    os.system('python prd.py -s gui_settings.json')
 
-        # Optional, resize label to image size
-        self.label.resize(self.pixmap.width(), self.pixmap.height())
+def show_image():
+    w = json_set['width']
+    h = json_set['height']
+    image_window = Frame(master_frame, width=w, height=h)
+    image_window.grid(row=0, column=100)
+    global canvas
+    canvas = Canvas(image_window, width=w, height=h)
+    global img
+    global image_container
+    img = PhotoImage(file="progress.png")
+    image_container = canvas.create_image(0,0, anchor="nw",image=img)
+    canvas.pack()
+    updater()   
 
-        self.worker_func = worker_func
+def updater():
+    window.after(1000, refresh_image)
 
-        QTimer.singleShot(0, self.runWorker)
+def refresh_image():
+    updater()
+    global img
+    global image_container
+    global canvas
+    img = PhotoImage(file="progress.png")
+    canvas.itemconfig(image_container, image = img)
 
-        # show all the widgets
-        self.show()
+window = Tk()
 
-    def runWorker(self):
-        # Step 2: Create a QThread object
-        self.thread = QThread()
-        # Step 3: Create a worker object
-        self.worker = Worker(self.worker_func)
-        # Step 4: Move worker to the thread
-        self.worker.moveToThread(self.thread)
-        # Step 5: Connect signals and slots
-        self.thread.started.connect(self.worker.run)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.worker.finished.connect(self.close)
-        # self.worker.progress.connect(self.reportProgress)
-        # Step 6: Start the thread
-        self.thread.start()
+master_frame = Frame(bg='Light Blue', bd=3, relief=RIDGE)
+master_frame.grid(sticky=NSEW)
+master_frame.columnconfigure(0, weight=1)
 
-    def setPixmap(self, img):
-        pixmap = pil2pixmap(img)
-        self.label.setPixmap(pixmap)
+left_frame = Frame(master_frame)
+left_frame.grid(row=0, column=0, sticky=NSEW)
 
-    def setText(self, txt):
-        self.label.setText(txt)
+frame1 = Frame(left_frame, bg='Light Green', bd=2, relief=FLAT)
+frame1.grid(row=1, column=0, sticky=NW)
 
+frame2 = Frame(left_frame, bg='Light Yellow', bd=2, relief=FLAT)
+frame2.grid(row=2, column=0, sticky=NW)
 
-window = None
+frame3 = Frame(left_frame, bg='Light Blue', bd=2, relief=FLAT)
+frame3.grid(row=3, column=0, sticky=NW) 
 
+prompt1 = Label(frame3, text='Prompt 1')
+prompt1.grid(row=1, column=0, pady=5, padx=2, sticky=NW)
 
-class Worker(QObject):
-    finished = pyqtSignal()
-    progress = pyqtSignal(QPixmap)
+prompt_text1 = Entry(frame3, textvariable=get_prompt(0), width=150)
+prompt_text1.grid(row=2, column=0, pady=5, padx=2, sticky=NW)
 
-    def __init__(self, worker_func):
-        super().__init__()
-        self.func = worker_func
+prompt2 = Label(frame3, text='Prompt 2')
+prompt2.grid(row=3, column=0, pady=5, padx=2, sticky=NW)
+if len(json_set['text_prompts']['0']) > 1:
+    prompt_text2 = Entry(frame3, textvariable=get_prompt(1), width=150)
+else:
+    prompt_text2 = Entry(frame3, textvariable='', width=150)
+prompt_text2.grid(row=4, column=0, pady=5, padx=2, sticky=NW)
 
-    def run(self):
-        self.func()
-        self.finished.emit()
+prompt3 = Label(frame3, text='Prompt 3')
+prompt3.grid(row=5, column=0, pady=5, padx=2, sticky=NW)
+if len(json_set['text_prompts']['0']) > 2:
+    prompt_text3 = Entry(frame3, textvariable=get_prompt(2), width=150)
+else:
+    prompt_text3 = Entry(frame3, textvariable='', width=150)
+prompt_text3.grid(row=6, column=0, pady=5, padx=2, sticky=NW)
 
+prompt4 = Label(frame3, text='Prompt 4')
+prompt4.grid(row=7, column=0, pady=5, padx=2, sticky=NW)
+if len(json_set['text_prompts']['0']) > 3:
+    prompt_text4 = Entry(frame3, textvariable=get_prompt(3), width=150)
+else:
+    prompt_text4 = Entry(frame3, textvariable='', width=150)
+prompt_text4.grid(row=8, column=0, pady=5, padx=2, sticky=NW)
 
-def run_gui(worker_func, width, height):
-    # create pyqt5 app
-    App = QApplication(sys.argv)
+steps = Label(frame1, text='Steps:')
+steps.grid(row=1, column=0, pady=5, padx=2, sticky=NW)
 
-    # create the instance of our Window
-    global window
-    window = Window(worker_func, width, height)
+steps_text = Entry(frame1, textvariable=get_text('steps'), width=8)
+steps_text.grid(row=1, column=1, pady=5, padx=2, sticky=NW)
 
-    # start the app
-    sys.exit(App.exec())
+height = Label(frame1, text='Height:')
+height.grid(row=1, column=2, pady=5, padx=2, sticky=NW)
 
+height_text = Entry(frame1, textvariable=get_text('height'), width=8)
+height_text.grid(row=1, column=3, pady=5, padx=2, sticky=NW)
 
-def update_image(img):
-    window.setPixmap(img)
+width = Label(frame1, text='Width:')
+width.grid(row=1, column=4, pady=5, padx=2, sticky=NW)
 
+width_text = Entry(frame1, textvariable=get_text('width'), width=12)
+width_text.grid(row=1, column=5, pady=5, padx=2, sticky=NW)
 
-def pil2pixmap(im):
-    if im.mode == "RGB":
-        r, g, b = im.split()
-        im = Image.merge("RGB", (b, g, r))
-    elif im.mode == "RGBA":
-        r, g, b, a = im.split()
-        im = Image.merge("RGBA", (b, g, r, a))
-    elif im.mode == "L":
-        im = im.convert("RGBA")
-    # Bild in RGBA konvertieren, falls nicht bereits passiert
-    im2 = im.convert("RGBA")
-    data = im2.tobytes("raw", "RGBA")
-    qim = QImage(data, im.size[0], im.size[1], QImage.Format_ARGB32)
-    pixmap = QPixmap.fromImage(qim)
-    return pixmap
+clip_guidance_scale = Label(frame1, text='Clip Guidance Scale:')
+clip_guidance_scale.grid(row=2, column=0, pady=5, padx=2, sticky=NW)
+
+clip_guidance_scale_text = Entry(frame1, textvariable=get_text('clip_guidance_scale'), width=8)
+clip_guidance_scale_text.grid(row=2, column=1, pady=5, padx=2, sticky=NW)
+
+skip_steps = Label(frame1, text='Skip Steps:')
+skip_steps.grid(row=2, column=2, pady=5, padx=2, sticky=NW)
+
+skip_steps_text = Entry(frame1, textvariable=get_text('skip_steps'), width=8)
+skip_steps_text.grid(row=2, column=3, pady=5, padx=2, sticky=NW)
+
+eta = Label(frame1, text='ETA:')
+eta.grid(row=3, column=0, pady=5, padx=2, sticky=NW)
+
+eta_text = Entry(frame1, textvariable=get_text('eta'), width=8)
+eta_text.grid(row=3, column=1, pady=5, padx=2, sticky=NW)
+
+use_secondary_model_text = get_num('use_secondary_model')
+use_secondary_model = Checkbutton(frame2, text='Use Secondary Model', variable=use_secondary_model_text)
+use_secondary_model.grid(row=4, column=5, pady=5, padx=2, sticky=NW)
+
+display_rate = Label(frame1, text='Display Rate:')
+display_rate.grid(row=3, column=2, pady=5, padx=2, sticky=NW)
+
+display_rate_text = Entry(frame1, textvariable=get_text('display_rate'), width=12)
+display_rate_text.grid(row=3, column=3, pady=5, padx=2, sticky=NW)
+
+vitb32_text = get_num('ViTB32')
+vitb32_check = Checkbutton(frame2, text='ViTB32', variable=vitb32_text)
+if vitb32_text.get() == 1:
+    vitb32_check.select()
+else:
+    vitb32_check.deselect()
+vitb32_check.grid(row=4, column=0, pady=5, padx=2, sticky=NW)
+
+vitb16_text = get_num('ViTB16')
+vitb16_check = Checkbutton(frame2, text='ViTB16', variable=vitb16_text)
+if vitb16_text.get() == 1:
+    vitb16_check.select()
+else:
+    vitb16_check.deselect()
+vitb16_check.grid(row=4, column=1, pady=5, padx=2, sticky=NW)
+
+vitl14_text = get_num('ViTL14')
+vitl14_check = Checkbutton(frame2, text='ViTL14', variable=vitl14_text)
+if vitl14_text.get() == 1:
+    vitl14_check.select()
+else:
+    vitl14_check.deselect()
+vitl14_check.grid(row=4, column=2, pady=5, padx=2, sticky=NW)
+
+vitl14_336_text = get_num('ViTL14_336')
+vitl14_336_check = Checkbutton(frame2, text='ViTL14_336', variable=vitl14_336_text)
+if vitl14_336_text.get() == 1:
+    vitl14_336_check.select()
+else:
+    vitl14_336_check.deselect()
+vitl14_336_check.grid(row=4, column=3, pady=5, padx=2, sticky=NW)
+
+rn101_text = get_num('RN101')
+rn101_check = Checkbutton(frame2, text='RN101', variable=rn101_text)
+if rn101_text.get() == 1:
+    rn101_check.select()
+else:
+    rn101_check.deselect()
+rn101_check.grid(row=4, column=4, pady=5, padx=2, sticky=NW)
+
+rn50_text = get_num('RN50')
+rn50_check = Checkbutton(frame2, text='RN50', variable=rn50_text)
+if rn50_text.get() == 1:
+    rn50_check.select()
+else:
+    rn50_check.deselect()
+rn50_check.grid(row=5, column=0, pady=5, padx=2, sticky=NW)
+
+rn50x4_text = get_num('RN50x4')
+rn50x4_check = Checkbutton(frame2, text='RN50x4', variable=rn50x4_text)
+if rn50x4_text.get() == 1:
+    rn50x4_check.select()
+else:
+    rn50x4_check.deselect()
+rn50x4_check.grid(row=5, column=1, pady=5, padx=2, sticky=NW)
+
+rn50x16_text = get_num('RN50x16')
+rn50x16_check = Checkbutton(frame2, text='RN50x16', variable=rn50x16_text)
+if rn50x16_text.get() == 1:
+    rn50x16_check.select()
+else:
+    rn50x16_check.deselect()
+rn50x16_check.grid(row=5, column=2, pady=5, padx=2, sticky=NW)
+
+rn50x64_text = get_num('RN50x64')
+rn50x64_check = Checkbutton(frame2, text='RN50x64', variable=rn50x64_text)
+if rn50x64_text.get() == 1:
+    rn50x64_check.select()
+else:
+    rn50x64_check.deselect()
+rn50x64_check.grid(row=5, column=3, pady=5, padx=2, sticky=NW)
+
+sampling_mode = Label(frame1, text='Sampling Mode:')
+sampling_mode.grid(row=2, column=4, pady=5, padx=2, sticky=NW)
+
+sampling_mode_text = get_text('sampling_mode')
+sampling_mode_drop = OptionMenu(frame1, sampling_mode_text, 'ddim', 'plms')
+sampling_mode_drop.grid(row=2, column=5, pady=5, padx=2, sticky=NW)
+
+batch_name = Label(frame1, text='Batch Name:')
+batch_name.grid(row=2, column=6, pady=5, padx=2, sticky=NW)
+
+batch_name_text = Entry(frame1, textvariable=get_text('batch_name'), width=10)
+batch_name_text.grid(row=2, column=7, pady=5, padx=2, sticky=NW)
+
+n_batches = Label(frame1, text='Number of Batches:')
+n_batches.grid(row=3, column=6, pady=5, padx=2, sticky=NW)
+
+n_batches_text = Entry(frame1, textvariable=get_text('n_batches'), width=12)
+n_batches_text.grid(row=3, column=7, pady=5, padx=2, sticky=NW)
+
+diffusion_model = Label(frame1, text='Diffusion Model:')
+diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
+
+diffusion_model_text = get_text('diffusion_model')
+diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120', '256x256_openai_comics_faces_by_alex_spirin_084000', '256x256_diffusion_uncond', 'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256', 'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion')
+diffusion_model_drop.grid(row=1, column=7, pady=5, padx=2, sticky=NW)
+
+set_seed = Label(frame1, text='Set Seed:')
+set_seed.grid(row=3, column=4, pady=5, padx=2, sticky=NW)
+
+set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=12)
+set_seed_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
+
+save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=6)
+run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=6)
+
+window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
+
+window.mainloop()
