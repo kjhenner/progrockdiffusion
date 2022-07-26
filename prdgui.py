@@ -1,3 +1,4 @@
+from msilib.schema import CheckBox
 from tkinter import *
 import os
 import json5 as json
@@ -5,9 +6,16 @@ import threading
 from PIL import ImageTk,Image
 
 if os.path.exists('gui_settings.json'):
-    json_set = json.load(open('gui_settings.json'))
+    try:
+        json_set = json.load(open('gui_settings.json'))
+        print("GUI settings loaded")
+    except:
+        print("Error loading gui_settings.json")
+        print("Loading from settings.json...")
+        json_set = json.load(open('settings.json'))
 else:
     json_set = json.load(open('settings.json'))
+    print("Default settings loaded")
 
 def get_num(derp):
     num = IntVar()
@@ -74,6 +82,12 @@ def save_text():
     json_set['display_rate'] = int(float(x))
     x = diffusion_model_text.get()
     json_set['diffusion_model'] = x
+    x = symm_loss_scale_text.get()
+    json_set['symm_loss_scale'] = int(float(x))
+    x = symmetry_loss_v_text.get()
+    json_set['symmetry_loss_v'] = x
+    x = symmetry_loss_h_text.get()
+    json_set['symmetry_loss_h'] = x
     prompt_text = [prompt_text1.get(), prompt_text2.get(), prompt_text3.get(), prompt_text4.get()]
     json_set['text_prompts']['0'] = prompt_text
     with open("gui_settings.json", "w") as outfile:
@@ -202,7 +216,7 @@ eta_text.grid(row=3, column=1, pady=5, padx=2, sticky=NW)
 
 use_secondary_model_text = get_num('use_secondary_model')
 use_secondary_model = Checkbutton(frame2, text='Use Secondary Model', variable=use_secondary_model_text)
-use_secondary_model.grid(row=4, column=5, pady=5, padx=2, sticky=NW)
+use_secondary_model.grid(row=5, column=4, pady=5, padx=2, sticky=NW)
 
 display_rate = Label(frame1, text='Display Rate:')
 display_rate.grid(row=3, column=2, pady=5, padx=2, sticky=NW)
@@ -314,8 +328,32 @@ set_seed.grid(row=3, column=4, pady=5, padx=2, sticky=NW)
 set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=12)
 set_seed_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
 
-save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=6)
-run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=6)
+symmetry_loss_v_text = get_text('symmetry_loss_v')
+symmetry_loss_v_check = Checkbutton(frame2, text='Vertical Symmetry', variable=symmetry_loss_v_text)
+if symmetry_loss_v_text.get() == 'true':
+    symmetry_loss_v_check.select()
+else:
+    symmetry_loss_v_check.deselect()
+symmetry_loss_v_check.grid(row=4, column=8, pady=5, padx=2, sticky=NW)
+
+symmetry_loss_h_text = get_text('symmetry_loss_h')
+symmetry_loss_h_check = Checkbutton(frame2, text='Horizontal Symmetry', variable=symmetry_loss_h_text)
+if symmetry_loss_h_text.get() == 'true':
+    symmetry_loss_h_check.select()
+else:
+    symmetry_loss_h_check.deselect()
+symmetry_loss_h_check.grid(row=4, column=9, pady=5, padx=2, sticky=NW)
+
+symm_loss_scale = Label(frame2, text='Symmetry Scale:')
+symm_loss_scale.grid(row=5, column=8, pady=5, padx=2, sticky=NW)
+
+symm_loss_scale_text = Entry(frame2, textvariable=get_text('symm_loss_scale'), width=12)
+symm_loss_scale_text.grid(row=5, column=9, pady=5, padx=2, sticky=NW)
+
+
+
+save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=10)
+run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=10)
 
 window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
 
