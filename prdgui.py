@@ -107,11 +107,14 @@ def updater():
 
 def refresh_image():
     updater()
-    global img
-    global image_container
-    global canvas
-    img = PhotoImage(file="progress.png")
-    canvas.itemconfig(image_container, image = img)
+    try:
+        global img
+        global image_container
+        global canvas
+        img = PhotoImage(file="progress.png")
+        canvas.itemconfig(image_container, image = img)
+    except:
+        pass
 
 window = Tk()
 
