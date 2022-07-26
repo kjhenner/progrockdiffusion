@@ -99,7 +99,6 @@ def save_text():
         prompt_text.append(prompt_text3.get())
     if prompt_text4.get() != '':
         prompt_text.append(prompt_text4.get())
-    print(prompt_text)
     json_set['text_prompts']['0'] = prompt_text
     with open("gui_settings.json", "w") as outfile:
         json.dump(json_set, outfile)
