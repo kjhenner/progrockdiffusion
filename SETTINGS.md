@@ -89,6 +89,8 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **symm_loss_scale** |  20000 | helps control how closely each side should match during symmetry. Definitely play with this number to get the results you're looking for.
 | **symm_switch** | 45 | what step to stop doing symmetry mode
 | **stop_early** | 0 | stop processing your image at a certain step
+| **use_jpg** | false | Save images as jpg rather than PNG (save disk space at cost of image quality)
+| **cool_down** | 0 | how many seconds to pause between images in a batch (give your GPU a chance to cool off a bit)
 
 ## Text Prompts
 There are a handful of techniques available within Text Prompts. Here are a few examples:

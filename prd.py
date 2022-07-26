@@ -68,6 +68,7 @@ import hashlib
 import random
 import numpy as np
 from datetime import datetime
+import time
 from guided_diffusion.script_util import create_model_and_diffusion, model_and_diffusion_defaults
 from resize_right import resize
 import clip
@@ -81,7 +82,7 @@ from types import SimpleNamespace
 import json5 as json
 from glob import glob
 from PIL.PngImagePlugin import PngInfo
-from PIL import Image, ImageOps, ImageStat, ImageEnhance
+from PIL import Image, ImageOps, ImageStat, ImageEnhance, ImageDraw
 import lpips
 import timm
 import math
@@ -247,6 +248,7 @@ symm_loss_scale = 2400
 symm_switch = 45
 use_jpg = False
 render_mask = None
+cool_down = 0
 
 # Command Line parse
 
@@ -587,7 +589,7 @@ for setting_arg in cl_args.settings:
             if is_json_key_present(settings_file, 'image_prompts'):
                 image_prompts = (settings_file['image_prompts'])
             if is_json_key_present(settings_file, 'clip_guidance_scale'):
-                if type(settings_file['clip_guidance_scale']) == str:
+                if (type(settings_file['clip_guidance_scale']) == str) and ((settings_file['clip_guidance_scale']) != "random"):
                     clip_guidance_scale = dynamic_value(settings_file['clip_guidance_scale'])
                 else:
                     clip_guidance_scale = clampval('clip_guidance_scale', 1500, (settings_file['clip_guidance_scale']), 100000)
@@ -651,7 +653,7 @@ for setting_arg in cl_args.settings:
             if is_json_key_present(settings_file, 'clamp_grad'):
                 clamp_grad = (settings_file['clamp_grad'])
             if is_json_key_present(settings_file, 'clamp_max'):
-                if type(settings_file['clamp_max']) == str:
+                if (type(settings_file['clamp_max']) == str) and ((settings_file['clamp_max']) != "random"):
                     clamp_max = dynamic_value(settings_file['clamp_max'])
                 else:
                     clamp_max = clampval('clamp_max', 0.001, settings_file['clamp_max'], 0.3)
@@ -729,7 +731,7 @@ for setting_arg in cl_args.settings:
             if is_json_key_present(settings_file, 'cut_innercut'):
                 cut_innercut = dynamic_value(settings_file['cut_innercut'])
             if is_json_key_present(settings_file, 'cut_ic_pow'):
-                if type(settings_file['cut_ic_pow']) == str:
+                if (type(settings_file['cut_ic_pow']) == str) and ((settings_file['cut_ic_pow']) != "random"):
                     cut_ic_pow = dynamic_value(settings_file['cut_ic_pow'])
                 else:
                     cut_ic_pow = clampval('cut_ic_pow', 0.0, (settings_file['cut_ic_pow']), 100)
@@ -816,6 +818,8 @@ for setting_arg in cl_args.settings:
                 use_jpg = (settings_file['use_jpg'])
             if is_json_key_present(settings_file, 'render_mask'):
                 render_mask = (settings_file['render_mask'])
+            if is_json_key_present(settings_file, 'cool_down'):
+                cool_down = (settings_file['cool_down'])
 
     except Exception as e:
         print('Failed to open or parse ' + setting_arg + ' - Check formatting.')
@@ -2921,30 +2925,100 @@ def slice(source, rmask, imask):
     slices_with_rmasks = zip(slices, slice_rmasks, slice_imasks)
     return slices_with_rmasks
 
-# # Alternative method uses a grid of images that each equal the size of the original render
-# def grid_slice(source, rmask, imask, og_size):
-#     overlap = 64
-#     width, height = og_size
-#     canvas_width, canvas_height = source.size
-#     # loc_width and loc_height are the center point of the goal size, and we'll start there and work our way out
-#     loc_width = int(canvas_width / 2)
-#     loc_height = int(canvas_height / 2)
-#     slices = []
-#     grid_in_progress = True
-#     while grid_in_progress == True:
-#         #first slice is in the center, this calculates where its 0,0 position will be
-#         slicex = (loc_width - int(width / 2)) + overlap
-#         slicey = (loc_height - int(height / 2)) + overlap
-        
+# Alternative method composites a grid of images at the positions provided
+def grid_merge(source, slices):
+    source.convert("RGBA")
+    for slice, posx, posy in slices: # go in reverse to get proper stacking
+        source.alpha_composite(slice, (posx, posy))
+    return source
 
+def grid_coords(target, original, overlap):
+    #generate a list of coordinate tuples for our sections, in order of how they'll be rendered
+    #target should be the size for the gobig result, original is the size of each chunk being rendered
+    center = []
+    target_x, target_y = target
+    center_x = int(target_x / 2)
+    center_y = int(target_y / 2)
+    original_x, original_y = original
+    x = center_x - int(original_x / 2)
+    y = center_y - int(original_y / 2)
+    center.append((x,y)) #center chunk
+    uy = y #up
+    uy_list = []
+    dy = y #down
+    dy_list = []
+    lx = x #left
+    lx_list = []
+    rx = x #right
+    rx_list = []
+    while uy > 0: #center row vertical up
+        uy = uy - original_y + overlap
+        uy_list.append((lx, uy))
+    while (dy + original_y) <= target_y: #center row vertical down
+        dy = dy + original_y - overlap
+        dy_list.append((rx, dy))
+    while lx > 0:
+        lx = lx - original_x + overlap
+        lx_list.append((lx, y))
+        uy = y
+        while uy > 0:
+            uy = uy - original_y + overlap
+            uy_list.append((lx, uy))
+        dy = y
+        while (dy + original_y) <= target_y:
+            dy = dy + original_y - overlap
+            dy_list.append((lx, dy))
+    while (rx + original_x) <= target_x:
+        rx = rx + original_x - overlap
+        rx_list.append((rx, y))
+        uy = y
+        while uy > 0:
+            uy = uy - original_y + overlap
+            uy_list.append((rx, uy))
+        dy = y
+        while (dy + original_y) <= target_y:
+            dy = dy + original_y - overlap
+            dy_list.append((rx, dy))
+    # now put all the chunks into one master list of coordinates (essentially reverse of how we calculated them so that the central slices will be on top)
+    result = []
+    for coords in dy_list[::-1]:
+        result.append(coords)
+    for coords in uy_list[::-1]:
+        result.append(coords)
+    for coords in rx_list[::-1]:
+        result.append(coords)
+    for coords in lx_list[::-1]:
+        result.append(coords)
+    result.append(center[0])
+    for coords in result:
+        print(coords)
+    return result
+
+# Alternative method uses a grid of images that each equal the size of the original render
+def grid_slice(source, og_size=None): # rmask=None, imask=None,
+    overlap = 64
+    width, height = og_size
+    canvas_width, canvas_height = source.size
+    coordinates = grid_coords(source.size, og_size, overlap)
+    # loc_width and loc_height are the center point of the goal size, and we'll start there and work our way out
+    slices = []
+    for coordinate in coordinates:
+        x, y = coordinate
+        slices.append(((source.crop((x, y, x+width, y+height))), x, y))
+    for count, slice in enumerate(slices):
+        image, x, y = slice
+        image.save(f'slice{count}.png')
+    global slices_todo
+    slices_todo = len(slices) - 1
+    return slices
 
 # FINALLY DO THE RUN
 try:
     if (gui):
-        print("running with gui")
-        prdgui.run_gui(do_run, side_x, side_y)
+        print("The GUI should be invoked separately via 'python prdgui.py'")
     print(f'\nStarting batch!')
     for batch_image in range(n_batches):
+        og_size = (side_x, side_y)
         if cl_args.gobiginit is None:
             do_run(batch_image)
         if letsgobig:
@@ -2996,17 +3070,37 @@ try:
                     source_render_mask = source_render_mask.resize((reside_x, reside_y), get_resampling_mode())
             else:
                 source_image = Image.open(progress_image).convert('RGBA')
+                og_size = (int(side_x / gobig_scale), int(side_y / gobig_scale)) # we want to render sections that are what the original pre-scaled size probably was
             if init_masked is not None:
                 source_imask = Image.open(init_masked).convert('RGBA')
                 source_imask = source_imask.resize(source_image.size, get_resampling_mode()) # TODO if this works then do the source_render_mask the same way
             else:
                 source_imask = None
             # Slice source_image into overlapping slices
-            slices = slice(source_image, source_render_mask, source_imask)
+            slices = grid_slice(source_image, og_size)
+            if source_render_mask is not None:
+                rmasks = grid_slice(source_render_mask, og_size)
+            else:
+                rmasks = None
+            if source_imask is not None:
+                imasks = grid_slice(source_imask, og_size)
+            else:
+                imasks = None
+
+            #slices = slice(source_image, source_render_mask, source_imask)
             # Run PRD again for each slice, with proper init image paramaters, etc.
-            i = 1  # just to number the slices as they save
             betterslices = []
-            for chunk, chunk_rmask, chunk_imask in slices:
+            #for chunk, chunk_rmask, chunk_imask in slices:
+            for count, chunk_w_coords in enumerate(slices):
+                chunk, coord_x, coord_y = chunk_w_coords
+                if rmasks is not None:
+                    chunk_rmask = rmasks[count][0]
+                else:
+                    chunk_rmask = None
+                if imasks is not None:
+                    chunk_imask = imasks[count][0]
+                else:
+                    chunk_imask = None
                 seed = seed + 1
                 args.seed = seed
                 # Reset underlying systems for another run
@@ -3044,34 +3138,33 @@ try:
                 args.side_x, args.side_y = chunk.size
                 side_x, side_y = chunk.size
                 args.fix_brightness_contrast = False
-                do_run(batch_image, i)
+                do_run(batch_image, count)
                 print(f'Finished slice, grabbing {progress_image} and adding it to betterslices.')
                 resultslice = Image.open(progress_image).convert('RGBA')
-                betterslices.append(resultslice.copy())
+                betterslices.append((resultslice.copy(), coord_x, coord_y)) #TODO add coordinates here
                 resultslice.close()
+                time.sleep(cool_down)
+            #TODO replace below with new alpha masks and place them appropriately
+            # generate an alpha mask for compositing the chunks
+            alpha = Image.new('L', (args.side_x, args.side_y), color=0xFF)
+            alpha_gradient = ImageDraw.Draw(alpha)
+            a = 0
+            i = 0
+            overlap = 64
+            shape = ((args.side_x, args.side_y), (0,0))
+            while i < overlap:
+                alpha_gradient.rectangle(shape, fill = a)
+                a += 4
                 i += 1
-            # generate an alpha mask
-            # starts at full opacity * initial_value
-            # decrements opacity by gradient * x / width
-            if gobig_vertical:
-                alpha_gradient = Image.new('L', (args.side_x, 1), color=0xFF)
-                a = 0
-                for x in range(args.side_x):
-                    a += 4  # add 4 to alpha at each pixel, to give us a 64 pixel overlap gradient
-                    if a < 255:
-                        alpha_gradient.putpixel((x, 0), a)
-                    else:
-                        alpha_gradient.putpixel((x, 0), 255)
-                alpha = alpha_gradient.resize(betterslices[0].size, Image.Resampling.BICUBIC)
-            # add the generated alpha channel to a mask image
+                shape = ((args.side_x - i, args.side_y - i), (i,i))
             mask = Image.new('RGBA', (args.side_x, args.side_y), color=0)
             mask.putalpha(alpha)
-            i = 1  # start at 1 in the list instead of 0, because we don't need/want a mask on the first (0) image
-            while i < slices_todo:
-                betterslices[i] = addalpha(betterslices[i], mask)
-                i += 1
-            # Once we have all our images, mergeimgs back onto source.png, then save
-            final_output = mergeimgs(source_image, betterslices)
+            finished_slices = []
+            for betterslice, x, y in betterslices:
+                finished_slice = addalpha(betterslice, mask)
+                finished_slices.append((finished_slice, x, y))
+            # # Once we have all our images, mergeimgs back onto source.png, then save
+            final_output = grid_merge(source_image, finished_slices)
             final_output.save(final_output_image)
             print(f'\n\nGO BIG is complete!\n\n ***** NOTE *****\nYour output is saved as {final_output_image}!')
             # set everything back for the next image in the batch
@@ -3080,6 +3173,10 @@ try:
         if "cuda" in str(device):
             with torch.cuda.device(device):
                 torch.cuda.empty_cache()
+        if (batch_image + 1) < n_batches:
+            if cool_down != 0:
+                print(f'Pausing {cool_down} seconds to let your poor GPU have a break.')
+                time.sleep(cool_down)
 
 except KeyboardInterrupt:
     pass

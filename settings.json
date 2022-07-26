@@ -109,5 +109,6 @@
     "translation_y": "0: (0)",
     "video_init_path": "/content/training.mp4",
     "extract_nth_frame": 2,
-    "use_jpg": false
+    "use_jpg": false,
+    "cool_down": 0
 }
