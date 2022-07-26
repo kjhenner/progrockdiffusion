@@ -88,6 +88,8 @@ def save_text():
     json_set['symmetry_loss_v'] = x
     x = symmetry_loss_h_text.get()
     json_set['symmetry_loss_h'] = x
+    x = symm_switch_text.get()
+    json_set['symm_switch'] = x
     prompt_text = [prompt_text1.get(), prompt_text2.get(), prompt_text3.get(), prompt_text4.get()]
     json_set['text_prompts']['0'] = prompt_text
     with open("gui_settings.json", "w") as outfile:
@@ -342,18 +344,22 @@ if symmetry_loss_h_text.get() == 'true':
     symmetry_loss_h_check.select()
 else:
     symmetry_loss_h_check.deselect()
-symmetry_loss_h_check.grid(row=4, column=9, pady=5, padx=2, sticky=NW)
+symmetry_loss_h_check.grid(row=5, column=8, pady=5, padx=2, sticky=NW)
 
 symm_loss_scale = Label(frame2, text='Symmetry Scale:')
-symm_loss_scale.grid(row=5, column=8, pady=5, padx=2, sticky=NW)
+symm_loss_scale.grid(row=5, column=9, pady=5, padx=2, sticky=NW)
 
 symm_loss_scale_text = Entry(frame2, textvariable=get_text('symm_loss_scale'), width=12)
-symm_loss_scale_text.grid(row=5, column=9, pady=5, padx=2, sticky=NW)
+symm_loss_scale_text.grid(row=5, column=10, pady=5, padx=2, sticky=NW)
 
+symm_switch = Label(frame2, text='Symmetry Switch:')
+symm_switch.grid(row=4, column=9, pady=5, padx=2, sticky=NW)
 
+symm_switch_text = Entry(frame2, textvariable=get_text('symm_switch'), width=12)
+symm_switch_text.grid(row=4, column=10, pady=5, padx=2, sticky=NW)
 
-save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=10)
-run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=10)
+save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=11, pady=5, padx=2)
+run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=11, pady=5, padx=2)
 
 window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
 
