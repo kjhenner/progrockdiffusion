@@ -175,7 +175,7 @@ sudo apt-get install ffmpeg
 
 # Use
 
-If you are looking for the GUI instructions, click here: 
+If you are looking for the GUI instructions, click here: [GUI Instructions](#gui-instructions)
 
 NOTE: On your first run it might appear to hang. Let it go for a good while, though, as it might just be downloading models.
 Somtimes there is no feedback during the download process (why? Who knows)
