@@ -444,7 +444,7 @@ scrollbar['command'] = text.yview
 old_stdout = sys.stdout    
 sys.stdout = Redirect(text)
 
-window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
+window.title('ProgRockDiffusion (PRD GUI): '+json_set['batch_name'])
 
 window.mainloop()
 
