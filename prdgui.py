@@ -354,7 +354,7 @@ diffusion_model_drop = OptionMenu(
     'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256',
     'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion',
     'watercolordiffusion_2', 'PulpSciFiDiffusion',
-    'FeiArt_Handpainted_CG_Diffusion')
+    'FeiArt_Handpainted_CG_Diffusion', 'IsometricDiffusionRevrart512px')
 diffusion_model_drop.grid(row=1, column=7, pady=5, padx=2, sticky=NW)
 
 set_seed = Label(frame1, text='Set Seed:')
