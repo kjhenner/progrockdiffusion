@@ -183,5 +183,25 @@
         "resblock_updown": false,
         "use_scale_shift_norm": false,
         "use_fp16": true
+    },
+    "FeiArt_Handpainted_CG_Diffusion": { 
+        "SHA": "85f95f0618f288476ffcec9f48160542ba626f655b3df963543388dcd059f86a", 
+        "primary_link": "https://huggingface.co/Feiart/FeiArt-Handpainted-CG-Diffusion/resolve/main/FeiArt-Handpainted-CG-Diffusion.pt",
+        "secondary_link": "none",
+        "file_name": "FeiArt-Handpainted-CG-Diffusion.pt",
+        "attention_resolutions": "32, 16, 8",
+        "class_cond": false,
+        "diffusion_steps": 1000,
+        "rescale_timesteps": true,
+        "timestep_respacing": "ddim100",
+        "image_size": 512,
+        "learn_sigma": true,
+        "noise_schedule": "linear",
+        "num_channels": 256,
+        "num_heads": 64,
+        "num_res_blocks": 2,
+        "resblock_updown": true,
+        "use_fp16": true,
+        "use_scale_shift_norm": true
     }
 }

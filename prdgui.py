@@ -3,7 +3,7 @@ from tkinter import *
 import os
 import json5 as json
 import threading
-from PIL import ImageTk,Image
+from PIL import ImageTk, Image
 
 if os.path.exists('gui_settings.json'):
     try:
@@ -17,22 +17,27 @@ else:
     json_set = json.load(open('settings.json'))
     print("Default settings loaded")
 
+
 def get_num(derp):
     num = IntVar()
     num.set(json_set[derp])
     return num
+
 
 def get_text(derp):
     text = StringVar()
     text.set(json_set[derp])
     return text
 
+
 def get_prompt(x):
     text = StringVar()
     text.set(json_set['text_prompts']['0'][x])
     return text
 
+
 path = './'
+
 
 def save_text():
     x = batch_name_text.get()
@@ -103,14 +108,17 @@ def save_text():
     with open("gui_settings.json", "w") as outfile:
         json.dump(json_set, outfile)
 
+
 def run_thread():
     save_text()
     runThread = threading.Thread(target=do_run)
     runThread.start()
 
+
 def do_run():
     show_image()
     os.system('python prd.py -s gui_settings.json')
+
 
 def show_image():
     w = json_set['width']
@@ -122,12 +130,14 @@ def show_image():
     global img
     global image_container
     img = PhotoImage(file="progress.png")
-    image_container = canvas.create_image(0,0, anchor="nw",image=img)
+    image_container = canvas.create_image(0, 0, anchor="nw", image=img)
     canvas.pack()
-    updater()   
+    updater()
+
 
 def updater():
     window.after(1000, refresh_image)
+
 
 def refresh_image():
     updater()
@@ -136,9 +146,10 @@ def refresh_image():
         global image_container
         global canvas
         img = PhotoImage(file="progress.png")
-        canvas.itemconfig(image_container, image = img)
+        canvas.itemconfig(image_container, image=img)
     except:
         pass
+
 
 window = Tk()
 
@@ -156,7 +167,7 @@ frame2 = Frame(left_frame, bg='Light Yellow', bd=2, relief=FLAT)
 frame2.grid(row=2, column=0, sticky=NW)
 
 frame3 = Frame(left_frame, bg='Light Blue', bd=2, relief=FLAT)
-frame3.grid(row=3, column=0, sticky=NW) 
+frame3.grid(row=3, column=0, sticky=NW)
 
 prompt1 = Label(frame3, text='Prompt 1')
 prompt1.grid(row=1, column=0, pady=5, padx=2, sticky=NW)
@@ -209,7 +220,9 @@ width_text.grid(row=1, column=5, pady=5, padx=2, sticky=NW)
 clip_guidance_scale = Label(frame1, text='Clip Guidance Scale:')
 clip_guidance_scale.grid(row=2, column=0, pady=5, padx=2, sticky=NW)
 
-clip_guidance_scale_text = Entry(frame1, textvariable=get_text('clip_guidance_scale'), width=8)
+clip_guidance_scale_text = Entry(frame1,
+                                 textvariable=get_text('clip_guidance_scale'),
+                                 width=8)
 clip_guidance_scale_text.grid(row=2, column=1, pady=5, padx=2, sticky=NW)
 
 skip_steps = Label(frame1, text='Skip Steps:')
@@ -225,13 +238,17 @@ eta_text = Entry(frame1, textvariable=get_text('eta'), width=8)
 eta_text.grid(row=3, column=1, pady=5, padx=2, sticky=NW)
 
 use_secondary_model_text = get_num('use_secondary_model')
-use_secondary_model = Checkbutton(frame2, text='Use Secondary Model', variable=use_secondary_model_text)
+use_secondary_model = Checkbutton(frame2,
+                                  text='Use Secondary Model',
+                                  variable=use_secondary_model_text)
 use_secondary_model.grid(row=5, column=4, pady=5, padx=2, sticky=NW)
 
 display_rate = Label(frame1, text='Display Rate:')
 display_rate.grid(row=3, column=2, pady=5, padx=2, sticky=NW)
 
-display_rate_text = Entry(frame1, textvariable=get_text('display_rate'), width=12)
+display_rate_text = Entry(frame1,
+                          textvariable=get_text('display_rate'),
+                          width=12)
 display_rate_text.grid(row=3, column=3, pady=5, padx=2, sticky=NW)
 
 vitb32_text = get_num('ViTB32')
@@ -259,7 +276,9 @@ else:
 vitl14_check.grid(row=4, column=2, pady=5, padx=2, sticky=NW)
 
 vitl14_336_text = get_num('ViTL14_336')
-vitl14_336_check = Checkbutton(frame2, text='ViTL14_336', variable=vitl14_336_text)
+vitl14_336_check = Checkbutton(frame2,
+                               text='ViTL14_336',
+                               variable=vitl14_336_text)
 if vitl14_336_text.get() == 1:
     vitl14_336_check.select()
 else:
@@ -329,7 +348,13 @@ diffusion_model = Label(frame1, text='Diffusion Model:')
 diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
 
 diffusion_model_text = get_text('diffusion_model')
-diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120', '256x256_openai_comics_faces_by_alex_spirin', '256x256_diffusion_uncond', 'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256', 'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion')
+diffusion_model_drop = OptionMenu(
+    frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120',
+    '256x256_openai_comics_faces_by_alex_spirin', '256x256_diffusion_uncond',
+    'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256',
+    'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion',
+    'watercolordiffusion_2', 'PulpSciFiDiffusion',
+    'FeiArt_Handpainted_CG_Diffusion')
 diffusion_model_drop.grid(row=1, column=7, pady=5, padx=2, sticky=NW)
 
 set_seed = Label(frame1, text='Set Seed:')
@@ -339,7 +364,9 @@ set_seed_text = Entry(frame1, textvariable=get_text('set_seed'), width=12)
 set_seed_text.grid(row=3, column=5, pady=5, padx=2, sticky=NW)
 
 symmetry_loss_v_text = get_num('symmetry_loss_v')
-symmetry_loss_v_check = Checkbutton(frame2, text='Vertical Symmetry', variable=symmetry_loss_v_text)
+symmetry_loss_v_check = Checkbutton(frame2,
+                                    text='Vertical Symmetry',
+                                    variable=symmetry_loss_v_text)
 if symmetry_loss_v_text.get() == 1:
     symmetry_loss_v_check.select()
 else:
@@ -347,7 +374,9 @@ else:
 symmetry_loss_v_check.grid(row=4, column=8, pady=5, padx=2, sticky=NW)
 
 symmetry_loss_h_text = get_num('symmetry_loss_h')
-symmetry_loss_h_check = Checkbutton(frame2, text='Horizontal Symmetry', variable=symmetry_loss_h_text)
+symmetry_loss_h_check = Checkbutton(frame2,
+                                    text='Horizontal Symmetry',
+                                    variable=symmetry_loss_h_text)
 if symmetry_loss_h_text.get() == 1:
     symmetry_loss_h_check.select()
 else:
@@ -357,18 +386,28 @@ symmetry_loss_h_check.grid(row=5, column=8, pady=5, padx=2, sticky=NW)
 symm_loss_scale = Label(frame2, text='Symmetry Scale:')
 symm_loss_scale.grid(row=5, column=9, pady=5, padx=2, sticky=NW)
 
-symm_loss_scale_text = Entry(frame2, textvariable=get_text('symm_loss_scale'), width=12)
+symm_loss_scale_text = Entry(frame2,
+                             textvariable=get_text('symm_loss_scale'),
+                             width=12)
 symm_loss_scale_text.grid(row=5, column=10, pady=5, padx=2, sticky=NW)
 
 symm_switch = Label(frame2, text='Symmetry Switch:')
 symm_switch.grid(row=4, column=9, pady=5, padx=2, sticky=NW)
 
-symm_switch_text = Entry(frame2, textvariable=get_text('symm_switch'), width=12)
+symm_switch_text = Entry(frame2,
+                         textvariable=get_text('symm_switch'),
+                         width=12)
 symm_switch_text.grid(row=4, column=10, pady=5, padx=2, sticky=NW)
 
-save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=11, pady=5, padx=2)
-run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=11, pady=5, padx=2)
+save = Button(frame2, text='Save Settings', command=save_text).grid(row=4,
+                                                                    column=11,
+                                                                    pady=5,
+                                                                    padx=2)
+run = Button(frame2, text='Run', command=run_thread).grid(row=5,
+                                                          column=11,
+                                                          pady=5,
+                                                          padx=2)
 
-window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
+window.title('ProgRockDiffusion (PRD): ' + json_set['batch_name'])
 
 window.mainloop()
