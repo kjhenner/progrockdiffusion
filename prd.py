@@ -54,7 +54,7 @@ Comic faces model by alex_spirin
 import sys
 import os
 
-root_path = os.getcwd()  # noqa: E402
+root_path = os.getcwd() # noqa: E402
 sys.path.append(f'{root_path}/ResizeRight')  # noqa: E402
 sys.path.append(f'{root_path}/CLIP')  # noqa: E402
 sys.path.append(f'{root_path}/guided-diffusion')  # noqa: E402
@@ -138,6 +138,7 @@ if sys.platform == 'win32':
 
 # Uncomment the below line if you're getting an error about OMP: Error #15.
 # os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
+
 
 # Setting default values for everything, which can then be overridden by settings files.
 batch_name = "Default"
@@ -306,12 +307,15 @@ def parse_args():
         prog='ProgRockDiffusion',
         description='Generate images from text prompts.',
         epilog=example_text,
-        formatter_class=argparse.RawDescriptionHelpFormatter)
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
 
-    my_parser.add_argument('--gui',
-                           action='store_true',
-                           required=False,
-                           help='Use the PyQt5 GUI')
+    my_parser.add_argument(
+        '--gui',
+        action='store_true',
+        required=False,
+        help='Use the PyQt5 GUI'
+    )
 
     my_parser.add_argument(
         '-s',
@@ -319,8 +323,7 @@ def parse_args():
         action='append',
         required=False,
         default=['settings.json'],
-        help=
-        'A settings JSON file to use, best to put in quotes. Multiples are allowed and layered in order.'
+        help='A settings JSON file to use, best to put in quotes. Multiples are allowed and layered in order.'
     )
 
     my_parser.add_argument(
@@ -328,19 +331,24 @@ def parse_args():
         '--output',
         action='store',
         required=False,
-        help='What output directory to use within images_out')
+        help='What output directory to use within images_out'
+    )
 
-    my_parser.add_argument('-p',
-                           '--prompt',
-                           action='append',
-                           required=False,
-                           help='Override the prompt')
+    my_parser.add_argument(
+        '-p',
+        '--prompt',
+        action='append',
+        required=False,
+        help='Override the prompt'
+    )
 
-    my_parser.add_argument('-i',
-                           '--ignoreseed',
-                           action='store_true',
-                           required=False,
-                           help='Ignores the random seed in the settings file')
+    my_parser.add_argument(
+        '-i',
+        '--ignoreseed',
+        action='store_true',
+        required=False,
+        help='Ignores the random seed in the settings file'
+    )
 
     my_parser.add_argument(
         '-c',
@@ -351,7 +359,8 @@ def parse_args():
         required=False,
         default=False,
         const=0,
-        help='Force use of CPU instead of GPU, and how many threads to run')
+        help='Force use of CPU instead of GPU, and how many threads to run'
+    )
 
     my_parser.add_argument(
         '-g',
@@ -362,50 +371,51 @@ def parse_args():
         required=False,
         default=False,
         const=20,
-        help=
-        'Save a partial image at the specified percent of steps (1 to 99), for use as later init image'
+        help='Save a partial image at the specified percent of steps (1 to 99), for use as later init image'
     )
-    my_parser.add_argument('-u',
-                           '--useinit',
-                           action='store_true',
-                           required=False,
-                           default=False,
-                           help='Use the specified init image')
+    my_parser.add_argument(
+        '-u',
+        '--useinit',
+        action='store_true',
+        required=False,
+        default=False,
+        help='Use the specified init image'
+    )
 
-    my_parser.add_argument('--cuda',
-                           action='store',
-                           required=False,
-                           default='0',
-                           help='Which GPU to use. Default is 0.')
+    my_parser.add_argument(
+        '--cuda',
+        action='store',
+        required=False,
+        default='0',
+        help='Which GPU to use. Default is 0.'
+    )
 
     my_parser.add_argument(
         '--hidemetadata',
         action='store_true',
         required=False,
-        help='Will prevent settings from being added to the output PNG file')
+        help='Will prevent settings from being added to the output PNG file'
+    )
 
     my_parser.add_argument(
         '--gobig',
         action='store_true',
         required=False,
-        help=
-        'After generation, the image is split into sections and re-rendered, to double the size.'
+        help='After generation, the image is split into sections and re-rendered, to double the size.'
     )
 
     my_parser.add_argument(
         '--gobiginit',
         action='store',
         required=False,
-        help=
-        'An image to use to kick off GO BIG mode, skipping the initial render.'
+        help='An image to use to kick off GO BIG mode, skipping the initial render.'
     )
 
     my_parser.add_argument(
         '--gobigmask',
         action='store',
         required=False,
-        help=
-        'An image mask for your gobig render, telling the system where to draw/not draw.'
+        help='An image mask for your gobig render, telling the system where to draw/not draw.'
     )
 
     my_parser.add_argument(
@@ -416,8 +426,7 @@ def parse_args():
         required=False,
         default=False,
         const=2,
-        help=
-        'If you already scaled your gobiginit image, add this option along with the multiplier used (default 2)'
+        help='If you already scaled your gobiginit image, add this option along with the multiplier used (default 2)'
     )
 
     my_parser.add_argument(
@@ -428,14 +437,14 @@ def parse_args():
         required=False,
         default=False,
         const=5,
-        help='To manually override the calculated number of slices for gobig')
+        help='To manually override the calculated number of slices for gobig'
+    )
 
     my_parser.add_argument(
         '--esrgan',
         action='store_true',
         required=False,
-        help=
-        'Resize your output with ESRGAN (realesrgan-ncnn-vulkan must be in your path).'
+        help='Resize your output with ESRGAN (realesrgan-ncnn-vulkan must be in your path).'
     )
 
     my_parser.add_argument(
@@ -443,22 +452,27 @@ def parse_args():
         action='store_true',
         required=False,
         default=False,
-        help='Do not check values to make sure they are sensible.')
+        help='Do not check values to make sure they are sensible.'
+    )
 
     my_parser.add_argument(
         '--log_level',
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Specify the log level. (default: 'INFO')")
+        help="Specify the log level. (default: 'INFO')"
+    )
 
-    my_parser.add_argument('--cut_debug',
-                           action="store_true",
-                           help="Output cut debug images.")
+    my_parser.add_argument(
+        '--cut_debug',
+        action="store_true",
+        help="Output cut debug images."
+    )
 
     return my_parser.parse_args()
 
 
 cl_args = parse_args()
+
 
 # Configure logging
 numeric_log_level = numeric_level = getattr(logging, cl_args.log_level, None)
@@ -496,18 +510,13 @@ def clampval(var_name, minval, val, maxval):
     elif type(val) == str:
         return val
     elif val < minval and not cl_args.skip_checks:
-        print(
-            f'Warning: {var_name} is below {minval} - if you get bad results, consider adjusting.'
-        )
+        print(f'Warning: {var_name} is below {minval} - if you get bad results, consider adjusting.')
         return val
     elif val > maxval and not cl_args.skip_checks:
-        print(
-            f'Warning: {var_name} is above {maxval} - if you get bad results, consider adjusting.'
-        )
+        print(f'Warning: {var_name} is above {maxval} - if you get bad results, consider adjusting.')
         return val
     else:
         return val
-
 
 # Dynamic value - takes ready-made possible options within a string and returns the string with an option randomly selected
 # Format is "I will return <Value1|Value2|Value3> in this string"
@@ -519,11 +528,10 @@ def clampval(var_name, minval, val, maxval):
 
 
 def dynamic_value(incoming):
-    if type(incoming
-            ) == str:  # we only need to do something if it's a string...
+    if type(incoming) == str:  # we only need to do something if it's a string...
         if incoming == "auto" or incoming == "random":
             return incoming
-        elif "<" in incoming:  # ...and if < is in the string...
+        elif "<" in incoming:   # ...and if < is in the string...
             text = incoming
             logger.debug(f'Original value: {text}')
             while "<" in text:
@@ -557,8 +565,7 @@ print('-------------------')
 # Apologies if this offends you. At least it's only on a critical miss, right?
 d20 = random.randint(1, 20)
 if d20 == 1:
-    print(
-        'Please consider supporting my Patreon. Thanks! https://is.gd/rVX6IH')
+    print('Please consider supporting my Patreon. Thanks! https://is.gd/rVX6IH')
 else:
     print('')
 
@@ -578,26 +585,19 @@ for setting_arg in cl_args.settings:
                 image_prompts = (settings_file['image_prompts'])
             if is_json_key_present(settings_file, 'clip_guidance_scale'):
                 if type(settings_file['clip_guidance_scale']) == str:
-                    clip_guidance_scale = dynamic_value(
-                        settings_file['clip_guidance_scale'])
+                    clip_guidance_scale = dynamic_value(settings_file['clip_guidance_scale'])
                 else:
-                    clip_guidance_scale = clampval(
-                        'clip_guidance_scale', 1500,
-                        (settings_file['clip_guidance_scale']), 100000)
+                    clip_guidance_scale = clampval('clip_guidance_scale', 1500, (settings_file['clip_guidance_scale']), 100000)
             if is_json_key_present(settings_file, 'tv_scale'):
-                if (settings_file['tv_scale']) != "auto" and (
-                        settings_file['tv_scale']) != "random":
+                if (settings_file['tv_scale']) != "auto" and (settings_file['tv_scale']) != "random":
                     tv_scale = int(dynamic_value(settings_file['tv_scale']))
                 tv_scale = clampval('tv_scale', 0, tv_scale, 1000)
             if is_json_key_present(settings_file, 'range_scale'):
-                if (settings_file['range_scale']) != "auto" and (
-                        settings_file['range_scale']) != "random":
-                    range_scale = int(
-                        dynamic_value(settings_file['range_scale']))
+                if (settings_file['range_scale']) != "auto" and (settings_file['range_scale']) != "random":
+                    range_scale = int(dynamic_value(settings_file['range_scale']))
                 range_scale = clampval('range_scale', 0, range_scale, 1000)
             if is_json_key_present(settings_file, 'sat_scale'):
-                if (settings_file['sat_scale']) != "auto" and (
-                        settings_file['sat_scale']) != "random":
+                if (settings_file['sat_scale']) != "auto" and (settings_file['sat_scale']) != "random":
                     sat_scale = int(dynamic_value(settings_file['sat_scale']))
                 sat_scale = clampval('sat_scale', 0, sat_scale, 20000)
             if is_json_key_present(settings_file, 'n_batches'):
@@ -645,18 +645,15 @@ for setting_arg in cl_args.settings:
                 if type(settings_file['clamp_max']) == str:
                     clamp_max = dynamic_value(settings_file['clamp_max'])
                 else:
-                    clamp_max = clampval('clamp_max', 0.001,
-                                         settings_file['clamp_max'], 0.3)
+                    clamp_max = clampval('clamp_max', 0.001, settings_file['clamp_max'], 0.3)
             if is_json_key_present(settings_file, 'set_seed'):
                 set_seed = (settings_file['set_seed'])
             if is_json_key_present(settings_file, 'fuzzy_prompt'):
                 fuzzy_prompt = (settings_file['fuzzy_prompt'])
             if is_json_key_present(settings_file, 'rand_mag'):
-                rand_mag = clampval('rand_mag', 0.0,
-                                    (settings_file['rand_mag']), 0.999)
+                rand_mag = clampval('rand_mag', 0.0, (settings_file['rand_mag']), 0.999)
             if is_json_key_present(settings_file, 'eta'):
-                if (settings_file['eta']) != "auto" and (
-                        settings_file['eta']) != "random":
+                if (settings_file['eta']) != "auto" and (settings_file['eta']) != "random":
                     eta = float(dynamic_value(settings_file['eta']))
                 eta = clampval('eta', 0.0, eta, 0.999)
             if is_json_key_present(settings_file, 'width'):
@@ -693,47 +690,31 @@ for setting_arg in cl_args.settings:
             if is_json_key_present(settings_file, 'RN50x64'):
                 RN50x64 = float(dynamic_value(settings_file['RN50x64']))
             if is_json_key_present(settings_file, 'ViTB32_laion2b_e16'):
-                ViTB32_laion2b_e16 = float(
-                    dynamic_value(settings_file['ViTB32_laion2b_e16']))
+                ViTB32_laion2b_e16 = float(dynamic_value(settings_file['ViTB32_laion2b_e16']))
             if is_json_key_present(settings_file, 'ViTB32_laion400m_e31'):
-                ViTB32_laion400m_e31 = float(
-                    dynamic_value(settings_file['ViTB32_laion400m_e31']))
+                ViTB32_laion400m_e31 = float(dynamic_value(settings_file['ViTB32_laion400m_e31']))
             if is_json_key_present(settings_file, 'ViTB32_laion400m_32'):
-                ViTB32_laion400m_32 = float(
-                    dynamic_value(settings_file['ViTB32_laion400m_32']))
-            if is_json_key_present(settings_file,
-                                   'ViTB32quickgelu_laion400m_e31'):
-                ViTB32quickgelu_laion400m_e31 = float(
-                    dynamic_value(
-                        settings_file['ViTB32quickgelu_laion400m_e31']))
-            if is_json_key_present(settings_file,
-                                   'ViTB32quickgelu_laion400m_e32'):
-                ViTB32quickgelu_laion400m_e32 = float(
-                    dynamic_value(
-                        settings_file['ViTB32quickgelu_laion400m_e32']))
+                ViTB32_laion400m_32 = float(dynamic_value(settings_file['ViTB32_laion400m_32']))
+            if is_json_key_present(settings_file, 'ViTB32quickgelu_laion400m_e31'):
+                ViTB32quickgelu_laion400m_e31 = float(dynamic_value(settings_file['ViTB32quickgelu_laion400m_e31']))
+            if is_json_key_present(settings_file, 'ViTB32quickgelu_laion400m_e32'):
+                ViTB32quickgelu_laion400m_e32 = float(dynamic_value(settings_file['ViTB32quickgelu_laion400m_e32']))
             if is_json_key_present(settings_file, 'ViTB16_laion400m_e31'):
-                ViTB16_laion400m_e31 = float(
-                    dynamic_value(settings_file['ViTB16_laion400m_e31']))
+                ViTB16_laion400m_e31 = float(dynamic_value(settings_file['ViTB16_laion400m_e31']))
             if is_json_key_present(settings_file, 'ViTB16_laion400m_e32'):
-                ViTB16_laion400m_e32 = float(
-                    dynamic_value(settings_file['ViTB16_laion400m_e32']))
+                ViTB16_laion400m_e32 = float(dynamic_value(settings_file['ViTB16_laion400m_e32']))
             if is_json_key_present(settings_file, 'RN50_yffcc15m'):
-                RN50_yffcc15m = float(
-                    dynamic_value(settings_file['RN50_yffcc15m']))
+                RN50_yffcc15m = float(dynamic_value(settings_file['RN50_yffcc15m']))
             if is_json_key_present(settings_file, 'RN50_cc12m'):
                 RN50_cc12m = float(dynamic_value(settings_file['RN50_cc12m']))
             if is_json_key_present(settings_file, 'RN50_quickgelu_yfcc15m'):
-                RN50_quickgelu_yfcc15m = float(
-                    dynamic_value(settings_file['RN50_quickgelu_yfcc15m']))
+                RN50_quickgelu_yfcc15m = float(dynamic_value(settings_file['RN50_quickgelu_yfcc15m']))
             if is_json_key_present(settings_file, 'RN50_quickgelu_cc12m'):
-                RN50_quickgelu_cc12m = float(
-                    dynamic_value(settings_file['RN50_quickgelu_cc12m']))
+                RN50_quickgelu_cc12m = float(dynamic_value(settings_file['RN50_quickgelu_cc12m']))
             if is_json_key_present(settings_file, 'RN101_yfcc15m'):
-                RN101_yfcc15m = float(
-                    dynamic_value(settings_file['RN101_yfcc15m']))
+                RN101_yfcc15m = float(dynamic_value(settings_file['RN101_yfcc15m']))
             if is_json_key_present(settings_file, 'RN101_quickgelu_yfcc15m'):
-                RN101_quickgelu_yfcc15m = float(
-                    dynamic_value(settings_file['RN101_quickgelu_yfcc15m']))
+                RN101_quickgelu_yfcc15m = float(dynamic_value(settings_file['RN101_quickgelu_yfcc15m']))
             if is_json_key_present(settings_file, 'cut_overview'):
                 cut_overview = dynamic_value(settings_file['cut_overview'])
             if is_json_key_present(settings_file, 'cut_innercut'):
@@ -742,12 +723,9 @@ for setting_arg in cl_args.settings:
                 if type(settings_file['cut_ic_pow']) == str:
                     cut_ic_pow = dynamic_value(settings_file['cut_ic_pow'])
                 else:
-                    cut_ic_pow = clampval('cut_ic_pow', 0.0,
-                                          (settings_file['cut_ic_pow']), 100)
+                    cut_ic_pow = clampval('cut_ic_pow', 0.0, (settings_file['cut_ic_pow']), 100)
             if is_json_key_present(settings_file, 'cut_ic_pow_final'):
-                cut_ic_pow_final = clampval(
-                    'cut_ic_pow_final', 0.5,
-                    (settings_file['cut_ic_pow_final']), 100)
+                cut_ic_pow_final = clampval('cut_ic_pow_final', 0.5, (settings_file['cut_ic_pow_final']), 100)
             if is_json_key_present(settings_file, 'cut_icgray_p'):
                 cut_icgray_p = (settings_file['cut_icgray_p'])
             if is_json_key_present(settings_file, 'smooth_schedules'):
@@ -769,57 +747,41 @@ for setting_arg in cl_args.settings:
             if is_json_key_present(settings_file, 'intermediate_saves'):
                 intermediate_saves = (settings_file['intermediate_saves'])
             if is_json_key_present(settings_file, 'fix_brightness_contrast'):
-                fix_brightness_contrast = (
-                    settings_file['fix_brightness_contrast'])
+                fix_brightness_contrast = (settings_file['fix_brightness_contrast'])
             if is_json_key_present(settings_file, 'adjustment_interval'):
                 adjustment_interval = (settings_file['adjustment_interval'])
             if is_json_key_present(settings_file, 'high_contrast_threshold'):
-                high_contrast_threshold = (
-                    settings_file['high_contrast_threshold'])
-            if is_json_key_present(settings_file,
-                                   'high_contrast_adjust_amount'):
-                high_contrast_adjust_amount = (
-                    settings_file['high_contrast_adjust_amount'])
+                high_contrast_threshold = (settings_file['high_contrast_threshold'])
+            if is_json_key_present(settings_file, 'high_contrast_adjust_amount'):
+                high_contrast_adjust_amount = (settings_file['high_contrast_adjust_amount'])
             if is_json_key_present(settings_file, 'high_contrast_start'):
                 high_contrast_start = (settings_file['high_contrast_start'])
             if is_json_key_present(settings_file, 'high_contrast_adjust'):
                 high_contrast_adjust = (settings_file['high_contrast_adjust'])
             if is_json_key_present(settings_file, 'low_contrast_threshold'):
-                low_contrast_threshold = (
-                    settings_file['low_contrast_threshold'])
-            if is_json_key_present(settings_file,
-                                   'low_contrast_adjust_amount'):
-                low_contrast_adjust_amount = (
-                    settings_file['low_contrast_adjust_amount'])
+                low_contrast_threshold = (settings_file['low_contrast_threshold'])
+            if is_json_key_present(settings_file, 'low_contrast_adjust_amount'):
+                low_contrast_adjust_amount = (settings_file['low_contrast_adjust_amount'])
             if is_json_key_present(settings_file, 'low_contrast_start'):
                 low_contrast_start = (settings_file['low_contrast_start'])
             if is_json_key_present(settings_file, 'low_contrast_adjust'):
                 low_contrast_adjust = (settings_file['low_contrast_adjust'])
             if is_json_key_present(settings_file, 'high_brightness_threshold'):
-                high_brightness_threshold = (
-                    settings_file['high_brightness_threshold'])
-            if is_json_key_present(settings_file,
-                                   'high_brightness_adjust_amount'):
-                high_brightness_adjust_amount = (
-                    settings_file['high_brightness_adjust_amount'])
+                high_brightness_threshold = (settings_file['high_brightness_threshold'])
+            if is_json_key_present(settings_file, 'high_brightness_adjust_amount'):
+                high_brightness_adjust_amount = (settings_file['high_brightness_adjust_amount'])
             if is_json_key_present(settings_file, 'high_brightness_start'):
-                high_brightness_start = (
-                    settings_file['high_brightness_start'])
+                high_brightness_start = (settings_file['high_brightness_start'])
             if is_json_key_present(settings_file, 'high_brightness_adjust'):
-                high_brightness_adjust = (
-                    settings_file['high_brightness_adjust'])
+                high_brightness_adjust = (settings_file['high_brightness_adjust'])
             if is_json_key_present(settings_file, 'low_brightness_threshold'):
-                low_brightness_threshold = (
-                    settings_file['low_brightness_threshold'])
-            if is_json_key_present(settings_file,
-                                   'low_brightness_adjust_amount'):
-                low_brightness_adjust_amount = (
-                    settings_file['low_brightness_adjust_amount'])
+                low_brightness_threshold = (settings_file['low_brightness_threshold'])
+            if is_json_key_present(settings_file, 'low_brightness_adjust_amount'):
+                low_brightness_adjust_amount = (settings_file['low_brightness_adjust_amount'])
             if is_json_key_present(settings_file, 'low_brightness_start'):
                 low_brightness_start = (settings_file['low_brightness_start'])
             if is_json_key_present(settings_file, 'low_brightness_adjust'):
-                low_brightness_adjust = (
-                    settings_file['low_brightness_adjust'])
+                low_brightness_adjust = (settings_file['low_brightness_adjust'])
             if is_json_key_present(settings_file, 'sharpen_preset'):
                 sharpen_preset = (settings_file['sharpen_preset'])
             if is_json_key_present(settings_file, 'keep_unsharp'):
@@ -832,37 +794,28 @@ for setting_arg in cl_args.settings:
                 gobig_skip_ratio = (settings_file['gobig_skip_ratio'])
             if is_json_key_present(settings_file, 'symmetry_loss'):
                 symmetry_loss_v = (settings_file['symmetry_loss'])
-                print(
-                    "symmetry_loss was depracated, please use symmetry_loss_v in the future"
-                )
+                print("symmetry_loss was depracated, please use symmetry_loss_v in the future")
             if is_json_key_present(settings_file, 'symmetry_loss_v'):
                 symmetry_loss_v = (settings_file['symmetry_loss_v'])
             if is_json_key_present(settings_file, 'symmetry_loss_h'):
                 symmetry_loss_h = (settings_file['symmetry_loss_h'])
             if is_json_key_present(settings_file, 'symm_loss_scale'):
-                symm_loss_scale = int(
-                    dynamic_value(settings_file['symm_loss_scale']))
+                symm_loss_scale = int(dynamic_value(settings_file['symm_loss_scale']))
             if is_json_key_present(settings_file, 'symm_switch'):
-                symm_switch = int(
-                    clampval('symm_switch', 1, (settings_file['symm_switch']),
-                             steps))
+                symm_switch = int(clampval('symm_switch', 1, (settings_file['symm_switch']), steps))
             if is_json_key_present(settings_file, 'use_jpg'):
                 use_jpg = (settings_file['use_jpg'])
             if is_json_key_present(settings_file, 'render_mask'):
                 render_mask = (settings_file['render_mask'])
 
     except Exception as e:
-        print('Failed to open or parse ' + setting_arg +
-              ' - Check formatting.')
+        print('Failed to open or parse ' + setting_arg + ' - Check formatting.')
         print(e)
         quit()
 
 print('')
 
-width_height = [
-    int(width_height[0] * width_height_scale),
-    int(width_height[1] * width_height_scale)
-]
+width_height = [width_height[0] * width_height_scale, width_height[1] * width_height_scale]
 
 if symmetry_loss_v or symmetry_loss_h:
     #symm_switch = 100.*(1. - (symm_switch/steps))
@@ -879,9 +832,7 @@ if cl_args.ignoreseed:
 
 if cl_args.hidemetadata:
     add_metadata = False
-    print(
-        f'Hide metadata flag is ON, settings will not be stored in the PNG output.'
-    )
+    print(f'Hide metadata flag is ON, settings will not be stored in the PNG output.')
 
 gui = False
 if cl_args.gui:
@@ -895,17 +846,14 @@ if cl_args.gobig:
     gobig_vertical = True
     if cl_args.gobiginit:
         init_image = cl_args.gobiginit
-        print(
-            f'Using {init_image} to kickstart GO BIG. Initial render will be skipped.'
-        )
+        print(f'Using {init_image} to kickstart GO BIG. Initial render will be skipped.')
         # check to make sure it is a multiple of 64, otherwise resize it and let the user know.
         temp_image = Image.open(init_image)
         s_width, s_height = temp_image.size
         reside_x = (s_width // 64) * 64
         reside_y = (s_height // 64) * 64
         if reside_x != s_width or reside_y != s_height:
-            print(
-                'ERROR: Your go big init resolution was NOT a multiple of 64.')
+            print('ERROR: Your go big init resolution was NOT a multiple of 64.')
             print('ERROR: Please resize your image.')
             raise Exception("Exiting due to improperly sized go big init.")
         side_x, side_y = temp_image.size
@@ -913,7 +861,7 @@ if cl_args.gobig:
         width_height[1] = side_y
         temp_image.close
         if cl_args.gobigmask:
-            render_mask = cl_args.gobigmask  # might need to do the same checks here as above for init, but for now let's give the user a little credit.
+            render_mask = cl_args.gobigmask # might need to do the same checks here as above for init, but for now let's give the user a little credit.
     else:
         cl_args.gobiginit = None
     if cl_args.gobiginit_scaled != False:
@@ -922,16 +870,11 @@ if cl_args.gobig:
 if cl_args.geninit:
     geninit = True
     if cl_args.geninit > 0 and cl_args.geninit <= 100:
-        geninitamount = float(cl_args.geninit /
-                              100)  # turn it into a float percent
-        print(
-            f'GenInit mode enabled. A checkpoint image will be saved at {cl_args.geninit:.1%} of steps.'
-        )
+        geninitamount = float(cl_args.geninit / 100)  # turn it into a float percent
+        print(f'GenInit mode enabled. A checkpoint image will be saved at {cl_args.geninit:.1%} of steps.')
     else:
         geninitamount = 0.2
-        print(
-            f'GenInit mode enabled. Provided number was out of bounds, so using {geninitamount:.1%} of steps instead.'
-        )
+        print(f'GenInit mode enabled. Provided number was out of bounds, so using {geninitamount:.1%} of steps instead.')
 else:
     geninit = False
 
@@ -943,21 +886,15 @@ if skip_steps == 0 and ((init_image is not None) or (perlin_init == True)):
 
 if cl_args.useinit:
     if skip_steps == 0:
-        skip_steps = (
-            int(steps * 0.2)
-        )  # don't change skip_steps if the settings file specified one
+        skip_steps = (int(steps * 0.2))  # don't change skip_steps if the settings file specified one
     if path.exists(f'{cl_args.useinit}'):
         useinit = True
         init_image = cl_args.useinit
-        print(
-            f'UseInit mode is using {cl_args.useinit} and starting at {skip_steps}.'
-        )
+        print(f'UseInit mode is using {cl_args.useinit} and starting at {skip_steps}.')
     else:
         init_image = 'geninit.png'
         if path.exists(init_image):
-            print(
-                f'UseInit mode is using {init_image} and starting at {skip_steps}.'
-            )
+            print(f'UseInit mode is using {init_image} and starting at {skip_steps}.')
             useinit = True
         else:
             print('No init image found. Uneinit mode canceled.')
@@ -969,11 +906,10 @@ else:
 def val_interpolate(x1, y1, x2, y2, x):
     # Linear interpolation. Return y between y1 and y2 for the same position x is bettewen x1 and x2
     d = [[x1, y1], [x2, y2]]
-    output = d[0][1] + (x - d[0][0]) * ((d[1][1] - d[0][1]) /
-                                        (d[1][0] - d[0][0]))
+    output = d[0][1] + (x - d[0][0]) * ((d[1][1] - d[0][1])/(d[1][0] - d[0][0]))
     if type(y1) == int:
         output = int(output)  # return the proper type
-    return (output)
+    return(output)
 
 
 def num_to_schedule(input, final=-9999):
@@ -987,7 +923,7 @@ def num_to_schedule(input, final=-9999):
         output = output[:-1]  # remove the final plus character
     else:
         output = (f'[{input}]*1000')
-    return (output)
+    return(output)
 
 
 # Automatic Eta based on steps
@@ -1045,8 +981,7 @@ if clip_guidance_scale == 'auto':
     else:
         resrange = (maxcgsres - mincgsres)
         newrange = (maxcgs - mincgs)
-        clip_guidance_scale = ((
-            (res - mincgsres) * newrange) / resrange) + mincgs
+        clip_guidance_scale = (((res - mincgsres) * newrange) / resrange) + mincgs
         clip_guidance_scale = round(clip_guidance_scale)
     clip_guidance_scale = num_to_schedule(clip_guidance_scale)
     print(f'clip_guidance_scale set automatically to: {clip_guidance_scale}')
@@ -1078,7 +1013,7 @@ def randomizer(category):
         for line in f:
             randomizers.append(line.strip())
     random_item = random.choice(randomizers)
-    return (random_item)
+    return(random_item)
 
 
 def randomize_prompts(prompts):
@@ -1088,7 +1023,7 @@ def randomize_prompts(prompts):
         if "_" in prompt:
             while "_" in prompt:
                 start = prompt.index('_')
-                end = prompt.index('_', start + 1)
+                end = prompt.index('_', start+1)
                 swap = prompt[(start + 1):end]
                 swapped = randomizer(swap)
                 prompt = prompt.replace(f'_{swap}_', swapped, 1)
@@ -1125,17 +1060,17 @@ for k, v in text_prompts.items():
     print(f'  {k}: {v}')
 print('\n')
 
+
 # INIT IMAGE RANDOMIZER
 # If the setting for init_image is a word between two underscores, we'll pull a random image from that directory,
 # and set our size accordingly.
-
 
 # randomly pick a file name from a directory:
 def random_file(directory):
     files = []
     files = os.listdir(f'{initDirPath}/{directory}')
     file = random.choice(files)
-    return (file)
+    return(file)
 
 
 def get_resampling_mode():
@@ -1156,19 +1091,14 @@ if init_image != None:
     if init_image.startswith("_") and init_image.endswith("_"):
         randominit_dir = (init_image[1:])
         randominit_dir = (randominit_dir[:-1])  # parse out the directory name
-        print(
-            f"Randomly picking an init image from {initDirPath}/{randominit_dir}"
-        )
-        init_image_OriginalPath = init_image = (
-            f'{initDirPath}/{randominit_dir}/{random_file(randominit_dir)}')
+        print(f"Randomly picking an init image from {initDirPath}/{randominit_dir}")
+        init_image_OriginalPath = init_image = (f'{initDirPath}/{randominit_dir}/{random_file(randominit_dir)}')
         print(f"New init image is {init_image}")
         # check to see if the image matches the configured size, if not we'll resize it
         temp = Image.open(init_image).convert('RGB')
         temp_width, temp_height = temp.size
         if (temp_width != width_height[0]) or (temp_height != width_height[1]):
-            print(
-                'Randomly chosen init image does not match width and height from settings.'
-            )
+            print('Randomly chosen init image does not match width and height from settings.')
             print('It will be resized as temp_init.png and used as your init.')
             temp = temp.resize(width_height, get_resampling_mode())
             temp.save('temp_init.png')
@@ -1181,13 +1111,9 @@ if cl_args.cpu or not torch.cuda.is_available():
     fp16_mode = False
     cores = os.cpu_count()
     if cl_args.cpu == 0:
-        print(
-            f'No thread count specified. Using detected {cores} cores for CPU mode.'
-        )
+        print(f'No thread count specified. Using detected {cores} cores for CPU mode.')
     elif cl_args.cpu > cores:
-        print(
-            f'Too many threads specified. Using detected {cores} cores for CPU mode.'
-        )
+        print(f'Too many threads specified. Using detected {cores} cores for CPU mode.')
     else:
         cores = int(cl_args.cpu)
         print(f'Using {cores} cores for CPU mode.')
@@ -1196,8 +1122,7 @@ else:
     DEVICE = torch.device(f'cuda:{cl_args.cuda}')
     device = DEVICE
     fp16_mode = True
-    if torch.cuda.get_device_capability(device) == (
-            8, 0):  # A100 fix thanks to Emad
+    if torch.cuda.get_device_capability(device) == (8, 0):  # A100 fix thanks to Emad
         print('Disabling CUDNN for A100 gpu', file=sys.stderr)
         torch.backends.cudnn.enabled = False
 
@@ -1221,9 +1146,7 @@ def smooth_jazz(schedule):
     # Take a list of numbers (i.e. an already-evaluated schedule),
     # find the places where the number changes from one to the next, and smooth those transitions
     newschedule = schedule
-    zone = int(
-        len(schedule) * .05
-    )  # We want to smooth a transition for 50 steps in a 1000 step scenario
+    zone = int(len(schedule) * .05)  # We want to smooth a transition for 50 steps in a 1000 step scenario
     markers = []
     last_num = schedule[0]
     # build a list of indicies of where the number changes
@@ -1236,24 +1159,19 @@ def smooth_jazz(schedule):
     lastindex = 0
     if len(markers) > 0:
         for index in markers:
-            if (index - lastindex) >= (
-                    zone /
-                    2):  # only smooth if the indexes are far enough apart
+            if (index - lastindex) >= (zone / 2):  # only smooth if the indexes are far enough apart
                 start = int(index - (zone / 2))
                 if start < 1:
                     start = 1  # make sure we stay within the range of the array
                 end = int(index + (zone / 2))
                 if end > len(schedule):
-                    end = len(
-                        schedule
-                    )  # make sure we stay within the range of the array
+                    end = len(schedule)  # make sure we stay within the range of the array
                 i = start
                 while i < end:
-                    newschedule[i] = val_interpolate(start, schedule[start],
-                                                     end, schedule[end], i)
+                    newschedule[i] = val_interpolate(start, schedule[start], end, schedule[end], i)
                     i += 1
             lastindex = index
-    return (newschedule)
+    return(newschedule)
 
 
 def perlin(width, height, scale=10, device=None):
@@ -1266,10 +1184,8 @@ def perlin(width, height, scale=10, device=None):
     dots += wx * wy * (gx[:-1, :-1] * xs + gy[:-1, :-1] * ys)
     dots += (1 - wx) * wy * (-gx[1:, :-1] * (1 - xs) + gy[1:, :-1] * ys)
     dots += wx * (1 - wy) * (gx[:-1, 1:] * xs - gy[:-1, 1:] * (1 - ys))
-    dots += (1 - wx) * (1 - wy) * (-gx[1:, 1:] * (1 - xs) - gy[1:, 1:] *
-                                   (1 - ys))
-    return dots.permute(0, 2, 1, 3).contiguous().view(width * scale,
-                                                      height * scale)
+    dots += (1 - wx) * (1 - wy) * (-gx[1:, 1:] * (1 - xs) - gy[1:, 1:] * (1 - ys))
+    return dots.permute(0, 2, 1, 3).contiguous().view(width * scale, height * scale)
 
 
 def perlin_ms(octaves, width, height, grayscale, device=device):
@@ -1288,10 +1204,7 @@ def perlin_ms(octaves, width, height, grayscale, device=device):
     return torch.cat(out_array)
 
 
-def create_perlin_noise(octaves=[1, 1, 1, 1],
-                        width=2,
-                        height=2,
-                        grayscale=True):
+def create_perlin_noise(octaves=[1, 1, 1, 1], width=2, height=2, grayscale=True):
     out = perlin_ms(octaves, width, height, grayscale)
     if grayscale:
         out = TF.resize(size=(side_y, side_x), img=out.unsqueeze(0))
@@ -1307,22 +1220,15 @@ def create_perlin_noise(octaves=[1, 1, 1, 1],
 
 def gen_perlin():
     if perlin_mode == 'color':
-        init = create_perlin_noise([1.5**-i * 0.5 for i in range(12)], 1, 1,
-                                   False)
-        init2 = create_perlin_noise([1.5**-i * 0.5 for i in range(8)], 4, 4,
-                                    False)
+        init = create_perlin_noise([1.5**-i * 0.5 for i in range(12)], 1, 1, False)
+        init2 = create_perlin_noise([1.5**-i * 0.5 for i in range(8)], 4, 4, False)
     elif perlin_mode == 'gray':
-        init = create_perlin_noise([1.5**-i * 0.5 for i in range(12)], 1, 1,
-                                   True)
-        init2 = create_perlin_noise([1.5**-i * 0.5 for i in range(8)], 4, 4,
-                                    True)
+        init = create_perlin_noise([1.5**-i * 0.5 for i in range(12)], 1, 1, True)
+        init2 = create_perlin_noise([1.5**-i * 0.5 for i in range(8)], 4, 4, True)
     else:
-        init = create_perlin_noise([1.5**-i * 0.5 for i in range(12)], 1, 1,
-                                   False)
-        init2 = create_perlin_noise([1.5**-i * 0.5 for i in range(8)], 4, 4,
-                                    True)
-    init = TF.to_tensor(init).add(
-        TF.to_tensor(init2)).div(2).to(device).unsqueeze(0).mul(2).sub(1)
+        init = create_perlin_noise([1.5**-i * 0.5 for i in range(12)], 1, 1, False)
+        init2 = create_perlin_noise([1.5**-i * 0.5 for i in range(8)], 4, 4, True)
+    init = TF.to_tensor(init).add(TF.to_tensor(init2)).div(2).to(device).unsqueeze(0).mul(2).sub(1)
     del init2
     return init.expand(batch_size, -1, -1, -1)
 
@@ -1353,14 +1259,14 @@ def range_loss(input):
 
 
 def symm_loss_v(im, lpm):
-    h = int(im.shape[3] / 2)
+    h = int(im.shape[3]/2)
     h1, h2 = im[:, :, :, :h], im[:, :, :, h:]
     h2 = TF.hflip(h2)
     return lpm(h1, h2)
 
 
 def symm_loss_h(im, lpm):
-    w = int(im.shape[2] / 2)
+    w = int(im.shape[2]/2)
     w1, w2 = im[:, :, :w, :], im[:, :, w:, :]
     w2 = TF.vflip(w2)
     return lpm(w1, w2)
@@ -1393,29 +1299,21 @@ def do_run(batch_num, slice_num=-1):
                 zoom = args.zoom_series[frame_num]
                 translation_x = args.translation_x_series[frame_num]
                 translation_y = args.translation_y_series[frame_num]
-                print(f'angle: {angle}', f'zoom: {zoom}',
-                      f'translation_x: {translation_x}',
-                      f'translation_y: {translation_y}')
+                print(f'angle: {angle}', f'zoom: {zoom}', f'translation_x: {translation_x}', f'translation_y: {translation_y}')
 
             if frame_num > 0:
                 seed = seed + 1
                 if resume_run and frame_num == start_frame:
-                    img_0 = cv2.imread(
-                        batchFolder +
-                        f"/{batch_name}({batchNum})_{start_frame-1:04}.png")
+                    img_0 = cv2.imread(batchFolder + f"/{batch_name}({batchNum})_{start_frame-1:04}.png")
                 else:
                     img_0 = cv2.imread('prevFrame.png')
                 center = (1 * img_0.shape[1] // 2, 1 * img_0.shape[0] // 2)
-                trans_mat = np.float32([[1, 0, translation_x],
-                                        [0, 1, translation_y]])
+                trans_mat = np.float32([[1, 0, translation_x], [0, 1, translation_y]])
                 rot_mat = cv2.getRotationMatrix2D(center, angle, zoom)
                 trans_mat = np.vstack([trans_mat, [0, 0, 1]])
                 rot_mat = np.vstack([rot_mat, [0, 0, 1]])
                 transformation_matrix = np.matmul(rot_mat, trans_mat)
-                img_0 = cv2.warpPerspective(img_0,
-                                            transformation_matrix,
-                                            (img_0.shape[1], img_0.shape[0]),
-                                            borderMode=cv2.BORDER_WRAP)
+                img_0 = cv2.warpPerspective(img_0, transformation_matrix, (img_0.shape[1], img_0.shape[0]), borderMode=cv2.BORDER_WRAP)
                 cv2.imwrite('prevFrameScaled.png', img_0)
                 init_image = 'prevFrameScaled.png'
                 init_scale = args.frames_scale
@@ -1507,7 +1405,8 @@ def do_run(batch_num, slice_num=-1):
                         prompts=sample_prompt,
                         step=s,
                         fuzzy_prompt=args.fuzzy_prompt,
-                        fuzzy_prompt_rand_mag=args.rand_mag)
+                        fuzzy_prompt_rand_mag=args.rand_mag
+                    )
                     clip_manager.prompt_embeds = prompt_embeds
                     clip_manager.prompt_weights = prompt_weights
                 if image_prompts:  # why image_prompts instead of sample_image_prompt?
@@ -1520,26 +1419,22 @@ def do_run(batch_num, slice_num=-1):
                         side_y=side_y,
                         fuzzy_prompt=args.fuzzy_prompt,
                         fuzzy_prompt_rand_mag=args.rand_mag,
-                        cutout_skip_augs=args.skip_augs)
+                        cutout_skip_augs=args.skip_augs
+                    )
                     if clip_manager.prompt_embeds is not None:
-                        clip_manager.prompt_embeds = torch.cat(
-                            [img_prompt_embeds, clip_manager.prompt_embeds])
+                        clip_manager.prompt_embeds = torch.cat([img_prompt_embeds, clip_manager.prompt_embeds])
                     else:
                         clip_manager.prompt_embeds = img_prompt_embeds
                     if clip_manager.prompt_weights is not None:
-                        clip_manager.prompt_weights = torch.cat(
-                            [img_prompt_weights, clip_manager.prompt_weights])
+                        clip_manager.prompt_weights = torch.cat([img_prompt_weights, clip_manager.prompt_weights])
                     else:
                         clip_manager.prompt_weights = img_prompt_weights
                 if not any((sample_prompt, image_prompts)):
-                    raise RuntimeError(
-                        "No prompts provided. You must provide text_prompts and/or image_prompts."
-                    )
+                    raise RuntimeError("No prompts provided. You must provide text_prompts and/or image_prompts.")
 
                 if clip_manager.prompt_weights.sum().abs() < 1e-3:
                     raise RuntimeError('The weights must not sum to 0.')
-                clip_manager.prompt_weights /= clip_manager.prompt_weights.sum(
-                ).abs()
+                clip_manager.prompt_weights /= clip_manager.prompt_weights.sum().abs()
 
         initial_weights = False
 
@@ -1558,18 +1453,14 @@ def do_run(batch_num, slice_num=-1):
         init = None
         if init_image is not None:
             init_img = Image.open(fetch(init_image)).convert('RGB')
-            init_img = init_img.resize((args.side_x, args.side_y),
-                                       get_resampling_mode())
+            init_img = init_img.resize((args.side_x, args.side_y), get_resampling_mode())
             init = TF.to_tensor(init_img).to(device).unsqueeze(0).mul(2).sub(1)
-            init_img = init_img.convert(
-                'RGBA'
-            )  # now that we've made our init, we add an alpha channel for later compositing
+            init_img = init_img.convert('RGBA') # now that we've made our init, we add an alpha channel for later compositing
 
         rmask = None
         if render_mask is not None:
             rmask_img = Image.open(fetch(render_mask)).convert('L')
-            rmask_img = rmask_img.resize((args.side_x, args.side_y),
-                                         get_resampling_mode())
+            rmask_img = rmask_img.resize((args.side_x, args.side_y), get_resampling_mode())
             rmask = TF.to_tensor(rmask_img).to(device).unsqueeze(0)
 
         if (args.perlin_init == True) and (init_image == None):
@@ -1583,26 +1474,16 @@ def do_run(batch_num, slice_num=-1):
                 x = x.detach().requires_grad_()
                 n = x.shape[0]
                 if use_secondary_model is True:
-                    alpha = torch.tensor(diffusion.sqrt_alphas_cumprod[cur_t],
-                                         device=device,
-                                         dtype=torch.float32)
-                    sigma = torch.tensor(
-                        diffusion.sqrt_one_minus_alphas_cumprod[cur_t],
-                        device=device,
-                        dtype=torch.float32)
+                    alpha = torch.tensor(diffusion.sqrt_alphas_cumprod[cur_t], device=device, dtype=torch.float32)
+                    sigma = torch.tensor(diffusion.sqrt_one_minus_alphas_cumprod[cur_t], device=device, dtype=torch.float32)
                     cosine_t = alpha_sigma_to_t(alpha, sigma)
                     out = secondary_model(x, cosine_t[None].repeat([n])).pred
                     fac = diffusion.sqrt_one_minus_alphas_cumprod[cur_t]
                     x_in = out * fac + x * (1 - fac)
                     x_in_grad = torch.zeros_like(x_in)
                 else:
-                    my_t = torch.ones([n], device=device,
-                                      dtype=torch.long) * cur_t
-                    out = diffusion.p_mean_variance(model,
-                                                    x,
-                                                    my_t,
-                                                    clip_denoised=False,
-                                                    model_kwargs={'y': y})
+                    my_t = torch.ones([n], device=device, dtype=torch.long) * cur_t
+                    out = diffusion.p_mean_variance(model,  x, my_t, clip_denoised=False, model_kwargs={'y': y})
                     fac = diffusion.sqrt_one_minus_alphas_cumprod[cur_t]
                     x_in = out['pred_xstart'] * fac + x * (1 - fac)
                     x_in_grad = torch.zeros_like(x_in)
@@ -1611,16 +1492,19 @@ def do_run(batch_num, slice_num=-1):
                     t_int = int(t.item()) + 1
                     for _ in range(args.cutn_batches[1000 - t_int]):
                         clip_losses = clip_manager.get_cut_batch_losses(
-                            x_in, n, args.cut_overview, args.cut_innercut,
-                            args.cut_ic_pow, args.cut_icgray_p, t_int,
-                            MakeCutoutsDango, cl_args.cut_debug)
-                        loss_values.append(clip_losses.sum().item(
-                        ))  # log loss, probably shouldn't do per cutn_batch
+                            x_in,
+                            n,
+                            args.cut_overview,
+                            args.cut_innercut,
+                            args.cut_ic_pow,
+                            args.cut_icgray_p,
+                            t_int,
+                            MakeCutoutsDango,
+                            cl_args.cut_debug
+                        )
+                        loss_values.append(clip_losses.sum().item())  # log loss, probably shouldn't do per cutn_batch
                         #factor in render_mask
-                        prompt_grad = torch.autograd.grad(
-                            clip_losses.sum() *
-                            args.clip_guidance_scale[1000 - t_int],
-                            x_in)[0] / args.cutn_batches[1000 - t_int]
+                        prompt_grad = torch.autograd.grad(clip_losses.sum() * args.clip_guidance_scale[1000 - t_int], x_in)[0] / args.cutn_batches[1000 - t_int]
                         if rmask != None:
                             x_in_grad += rmask.mul(prompt_grad)
                         else:
@@ -1635,8 +1519,7 @@ def do_run(batch_num, slice_num=-1):
                 logger.debug(f"tv_loss: {tv_losses.sum()}")
                 logger.debug(f"range_loss: {range_losses.sum()}")
                 logger.debug(f"sat_loss: {sat_losses.sum()}")
-                loss = tv_losses.sum() * tv_scale + range_losses.sum(
-                ) * range_scale + sat_losses.sum() * sat_scale
+                loss = tv_losses.sum() * tv_scale + range_losses.sum() * range_scale + sat_losses.sum() * sat_scale
                 if init is not None and args.init_scale:
                     init_losses = lpips_model(x_in, init)
                     loss = loss + init_losses.sum() * args.init_scale
@@ -1656,8 +1539,7 @@ def do_run(batch_num, slice_num=-1):
             if args.clamp_grad and x_is_NaN == False:
                 magnitude = grad.square().mean().sqrt()
 
-                return grad * magnitude.clamp(
-                    max=args.clamp_max[1000 - t_int]) / magnitude
+                return grad * magnitude.clamp(max=args.clamp_max[1000 - t_int]) / magnitude
             return grad
 
         if args.sampling_mode == 'ddim':
@@ -1677,9 +1559,7 @@ def do_run(batch_num, slice_num=-1):
         global actual_run_steps
         actual_run_steps = skip_steps
         total_steps = cur_t
-        logger.debug(
-            f'cur_t at start of image is {cur_t} and diffusion.num_timesteps is {diffusion.num_timesteps}'
-        )
+        logger.debug(f'cur_t at start of image is {cur_t} and diffusion.num_timesteps is {diffusion.num_timesteps}')
 
         if (args.perlin_init == True) and (init_image == None):
             init = gen_perlin()
@@ -1719,11 +1599,9 @@ def do_run(batch_num, slice_num=-1):
         imgToSharpen = None
         adjustment_prompt = []
         if slice_num >= 0:
-            progressBar.set_description(
-                f'Slice {slice_num} of {slices_todo}: ')
+            progressBar.set_description(f'Slice {slice_num} of {slices_todo}: ')
         else:
-            progressBar.set_description(
-                f'Image {batch_num + 1} of {n_batches}: ')
+            progressBar.set_description(f'Image {batch_num + 1} of {n_batches}: ')
         while cur_t >= stop_early:
             samples = do_sample_fn(init, steps - cur_t - 1)
             for j, sample in enumerate(samples):
@@ -1743,10 +1621,8 @@ def do_run(batch_num, slice_num=-1):
 
                 if actual_run_steps % args.display_rate == 0 or cur_t == -1 or intermediateStep == True:
                     for k, image in enumerate(sample['pred_xstart']):
-                        current_time = datetime.now().strftime(
-                            '%y%m%d-%H%M%S_%f')
-                        percent = math.ceil(actual_run_steps /
-                                            actual_total_steps * 100)
+                        current_time = datetime.now().strftime('%y%m%d-%H%M%S_%f')
+                        percent = math.ceil(actual_run_steps / actual_total_steps * 100)
                         if args.n_batches > 0:
                             # if intermediates are saved to the subfolder, don't append a step or percentage to the name
                             if cur_t == -1 and args.intermediates_in_subfolder is True:
@@ -1765,58 +1641,47 @@ def do_run(batch_num, slice_num=-1):
                                 # Or else, if we're working with specific steps, append those
                                 else:
                                     filename = f'{args.batch_name}({args.batchNum})_{batch_num:04}-{actual_run_steps:03}.png'
-                        image = TF.to_pil_image(
-                            image.add(1).div(2).clamp(0, 1))
+                        image = TF.to_pil_image(image.add(1).div(2).clamp(0, 1))
                         # add some key metadata to the PNG if the commandline allows it
                         metadata = PngInfo()
                         if add_metadata == True:
                             metadata.add_text("prompt", str(text_prompts))
                             metadata.add_text("seed", str(seed))
                             metadata.add_text("steps", str(steps))
-                            metadata.add_text("init_image",
-                                              str(init_image_OriginalPath))
+                            metadata.add_text("init_image", str(init_image_OriginalPath))
                             metadata.add_text("skip_steps", str(skip_steps))
-                            metadata.add_text("clip_guidance_scale",
-                                              str(clip_guidance_scale))
+                            metadata.add_text("clip_guidance_scale", str(clip_guidance_scale))
                             metadata.add_text("tv_scale", str(tv_scale))
                             metadata.add_text("range_scale", str(range_scale))
                             metadata.add_text("sat_scale", str(sat_scale))
                             metadata.add_text("eta", str(eta))
                             metadata.add_text("clamp_max", str(clamp_max))
-                            metadata.add_text("cut_overview",
-                                              str(cut_overview))
-                            metadata.add_text("cut_innercut",
-                                              str(cut_innercut))
+                            metadata.add_text("cut_overview", str(cut_overview))
+                            metadata.add_text("cut_innercut", str(cut_innercut))
                             metadata.add_text("cut_ic_pow", str(og_cut_ic_pow))
 
                         output_quality = 100
                         if use_jpg:
-                            filename = filename.replace('.png', '.jpg')
+                            filename = filename.replace('.png','.jpg')
                             output_quality = 95
-
+                        
                         if actual_run_steps % args.display_rate == 0 or actual_run_steps == 1 or cur_t == -1:
                             if cl_args.cuda != '0':
-                                image.save(
-                                    f"progress{cl_args.cuda}.png"
-                                )  # note the GPU being used if it's not 0, so it won't overwrite other GPU's work
+                                image.save(f"progress{cl_args.cuda}.png")  # note the GPU being used if it's not 0, so it won't overwrite other GPU's work
                             else:
                                 image.save('progress.png')
                         if args.steps_per_checkpoint is not None:
                             if actual_run_steps % args.steps_per_checkpoint == 0 and actual_run_steps > 0:
                                 if args.intermediates_in_subfolder is True:
-                                    image.save(f'{partialFolder}/{filename}',
-                                               quality=output_quality)
+                                    image.save(f'{partialFolder}/{filename}', quality = output_quality)
                                 else:
-                                    image.save(f'{batchFolder}/{filename}',
-                                               quality=output_quality)
+                                    image.save(f'{batchFolder}/{filename}', quality = output_quality)
                         else:
                             if actual_run_steps in args.intermediate_saves:
                                 if args.intermediates_in_subfolder is True:
-                                    image.save(f'{partialFolder}/{filename}',
-                                               quality=output_quality)
+                                    image.save(f'{partialFolder}/{filename}', quality = output_quality)
                                 else:
-                                    image.save(f'{batchFolder}/{filename}',
-                                               quality=output_quality)
+                                    image.save(f'{batchFolder}/{filename}', quality = output_quality)
                                 if geninit is True:
                                     image.save('geninit.png')
                                     raise KeyboardInterrupt
@@ -1827,25 +1692,19 @@ def do_run(batch_num, slice_num=-1):
                             if args.sharpen_preset != "Off" and animation_mode == "None":
                                 imgToSharpen = image
                                 if args.keep_unsharp is True:
-                                    image.save(f'{unsharpenFolder}/{filename}',
-                                               quality=output_quality)
+                                    image.save(f'{unsharpenFolder}/{filename}', quality = output_quality)
                             else:
                                 if render_mask:
-                                    # I don't know why PILLOW has to have copies of things, but it does.
-                                    print(
-                                        '\nUsing render mask to composite rendered image with init image.'
-                                    )
+                                    # I don't know why PILLOW has to have copies of things, but it does. 
+                                    print('\nUsing render mask to composite rendered image with init image.')
                                     image2 = image.copy()
                                     image2.putalpha(rmask_img)
                                     image2.save('test.png')
                                     image3 = image2.copy()
-                                    image3 = Image.alpha_composite(
-                                        init_img, image3)
+                                    image3 = Image.alpha_composite(init_img, image3)
                                     image = image3.copy()
                                     image.save('progress.png')
-                                image.save(f'{batchFolder}/{filename}',
-                                           pnginfo=metadata,
-                                           quality=output_quality)
+                                image.save(f'{batchFolder}/{filename}', pnginfo=metadata, quality = output_quality)
                                 if cl_args.esrgan:
                                     print('Resizing with ESRGAN')
                                     try:
@@ -1853,17 +1712,12 @@ def do_run(batch_num, slice_num=-1):
                                         if "cuda" in str(device):
                                             with torch.cuda.device(device):
                                                 torch.cuda.empty_cache()
-                                        subprocess.run([
-                                            'realesrgan-ncnn-vulkan', '-i',
-                                            f'{batchFolder}/{filename}', '-o',
-                                            f'{batchFolder}/ESRGAN-{filename}'
-                                        ],
-                                                       stdout=subprocess.PIPE
-                                                       ).stdout.decode('utf-8')
+                                        subprocess.run(
+                                            ['realesrgan-ncnn-vulkan', '-i', f'{batchFolder}/{filename}', '-o', f'{batchFolder}/ESRGAN-{filename}'],
+                                            stdout=subprocess.PIPE
+                                        ).stdout.decode('utf-8')
                                     except Exception as e:
-                                        print(
-                                            'ESRGAN resize failed. Make sure realesrgan-ncnn-vulkan is in your path (or in this directory)'
-                                        )
+                                        print('ESRGAN resize failed. Make sure realesrgan-ncnn-vulkan is in your path (or in this directory)')
                                         print(e)
 
                             # if (args.animation_mode == "None") and (letsgobig == False) and ((i + 1) < n_batches):
@@ -1872,9 +1726,7 @@ def do_run(batch_num, slice_num=-1):
                             #     np.random.seed(seed)
                             #     random.seed(seed)
                             #     torch.manual_seed(seed)
-                            progressBar.write(
-                                f'Image finished. Using seed {seed + batch_num} for next image.'
-                            )
+                            progressBar.write(f'Image finished. Using seed {seed + batch_num} for next image.')
 
                     do_weights(steps - cur_t - 1, clip_managers)
 
@@ -1893,53 +1745,38 @@ def do_run(batch_num, slice_num=-1):
                 s = steps - cur_t
 
                 # BRIGHTNESS and CONTRAST automatic correction
-                if (s % adjustment_interval
-                        == 0) and (s <
-                                   (steps * .3)) and (fix_brightness_contrast
-                                                      == True):
-                    if (high_brightness_adjust and s > high_brightness_start
-                            and brightness > high_brightness_threshold):
-                        progressBar.write(
-                            f"High brightness corrected at step {s}")
+                if (s % adjustment_interval == 0) and (s < (steps * .3)) and (fix_brightness_contrast == True):
+                    if (high_brightness_adjust and s > high_brightness_start and brightness > high_brightness_threshold):
+                        progressBar.write(f"High brightness corrected at step {s}")
                         filter = ImageEnhance.Brightness(image)
                         image = filter.enhance(high_brightness_adjust_amount)
-                        init = TF.to_tensor(image).to(device).unsqueeze(0).mul(
-                            2).sub(1)
+                        init = TF.to_tensor(image).to(device).unsqueeze(0).mul(2).sub(1)
                         break
 
-                    if (low_brightness_adjust and s > low_brightness_start
-                            and brightness < low_brightness_threshold):
-                        progressBar.write(
-                            f"Low brightness corrected at step {s}")
+                    if (low_brightness_adjust and s > low_brightness_start and brightness < low_brightness_threshold):
+                        progressBar.write(f"Low brightness corrected at step {s}")
                         filter = ImageEnhance.Brightness(image)
                         image = filter.enhance(low_brightness_adjust_amount)
-                        init = TF.to_tensor(image).to(device).unsqueeze(0).mul(
-                            2).sub(1)
+                        init = TF.to_tensor(image).to(device).unsqueeze(0).mul(2).sub(1)
                         break
 
-                    if (high_contrast_adjust and s > high_contrast_start
-                            and contrast > high_contrast_threshold):
-                        progressBar.write(
-                            f"High contrast corrected at step {s}")
+                    if (high_contrast_adjust and s > high_contrast_start and contrast > high_contrast_threshold):
+                        progressBar.write(f"High contrast corrected at step {s}")
                         filter = ImageEnhance.Contrast(image)
                         image = filter.enhance(high_contrast_adjust_amount)
-                        init = TF.to_tensor(image).to(device).unsqueeze(0).mul(
-                            2).sub(1)
+                        init = TF.to_tensor(image).to(device).unsqueeze(0).mul(2).sub(1)
                         break
 
-                    if (low_contrast_adjust and s > low_contrast_start
-                            and contrast < low_contrast_threshold):
-                        progressBar.write(
-                            f"Low contrast corrected at step {s}")
+                    if (low_contrast_adjust and s > low_contrast_start and contrast < low_contrast_threshold):
+                        progressBar.write(f"Low contrast corrected at step {s}")
                         filter = ImageEnhance.Contrast(image)
                         image = filter.enhance(low_contrast_adjust_amount)
-                        init = TF.to_tensor(image).to(device).unsqueeze(0).mul(
-                            2).sub(1)
+                        init = TF.to_tensor(image).to(device).unsqueeze(0).mul(2).sub(1)
                         break
 
                 if (cur_t == -1):
                     break
-        progressBar.close()
+        progressBar.close()            
 
 
 def save_settings():
@@ -2048,9 +1885,7 @@ def save_settings():
         'sloss_scale': symm_loss_scale,
         'symm_switch': symm_switch,
     }
-    with open(f"{batchFolder}/{batch_name}_{batchNum}_settings.json",
-              "w+",
-              encoding="utf-8") as f:  # save settings
+    with open(f"{batchFolder}/{batch_name}_{batchNum}_settings.json",  "w+", encoding="utf-8") as f:  # save settings
         json.dump(setting_list, f, ensure_ascii=False, indent=4)
 
 
@@ -2082,8 +1917,7 @@ class DiffusionOutput:
 
 class ConvBlock(nn.Sequential):
     def __init__(self, c_in, c_out):
-        super().__init__(nn.Conv2d(c_in, c_out, 3, padding=1),
-                         nn.ReLU(inplace=True))
+        super().__init__(nn.Conv2d(c_in, c_out, 3, padding=1),  nn.ReLU(inplace=True))
 
 
 class SkipBlock(nn.Module):
@@ -2100,8 +1934,7 @@ class FourierFeatures(nn.Module):
     def __init__(self, in_features, out_features, std=1.):
         super().__init__()
         assert out_features % 2 == 0
-        self.weight = nn.Parameter(
-            torch.randn([out_features // 2, in_features]) * std)
+        self.weight = nn.Parameter(torch.randn([out_features // 2, in_features]) * std)
 
     def forward(self, input):
         f = 2 * math.pi * input @ self.weight.T
@@ -2151,11 +1984,9 @@ class SecondaryDiffusionImageNet(nn.Module):
         )
 
     def forward(self, input, t):
-        timestep_embed = expand_to_planes(self.timestep_embed(t[:, None]),
-                                          input.shape)
+        timestep_embed = expand_to_planes(self.timestep_embed(t[:, None]), input.shape)
         v = self.net(torch.cat([input, timestep_embed], dim=1))
-        alphas, sigmas = map(partial(append_dims, n=v.ndim),
-                             t_to_alpha_sigma(t))
+        alphas, sigmas = map(partial(append_dims, n=v.ndim), t_to_alpha_sigma(t))
         pred = input * alphas - v * sigmas
         eps = input * sigmas + v * alphas
         return DiffusionOutput(v, pred, eps)
@@ -2169,9 +2000,7 @@ class SecondaryDiffusionImageNet2(nn.Module):
 
         self.timestep_embed = FourierFeatures(1, 16)
         self.down = nn.AvgPool2d(2)
-        self.up = nn.Upsample(scale_factor=2,
-                              mode='bilinear',
-                              align_corners=False)
+        self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
 
         self.net = nn.Sequential(
             ConvBlock(3 + 16, cs[0]),
@@ -2221,11 +2050,9 @@ class SecondaryDiffusionImageNet2(nn.Module):
         )
 
     def forward(self, input, t):
-        timestep_embed = expand_to_planes(self.timestep_embed(t[:, None]),
-                                          input.shape)
+        timestep_embed = expand_to_planes(self.timestep_embed(t[:, None]), input.shape)
         v = self.net(torch.cat([input, timestep_embed], dim=1))
-        alphas, sigmas = map(partial(append_dims, n=v.ndim),
-                             t_to_alpha_sigma(t))
+        alphas, sigmas = map(partial(append_dims, n=v.ndim),  t_to_alpha_sigma(t))
         pred = input * alphas - v * sigmas
         eps = input * sigmas + v * alphas
         return DiffusionOutput(v, pred, eps)
@@ -2240,11 +2067,16 @@ check_model_SHA = False  # @param{type:"boolean"}
 # TODO: Chance this to use any available model in the JSON file
 if diffusion_model == 'random':
     the_models = [
-        '256x256_diffusion_uncond', '512x512_diffusion_uncond_finetune_008100',
+        '256x256_diffusion_uncond',
+        '512x512_diffusion_uncond_finetune_008100',
         '256x256_openai_comics_faces_by_alex_spirin',
-        'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256',
-        'portrait_generator_v001', 'pixelartdiffusion4k',
-        'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion'
+        'pixel_art_diffusion_hard_256',
+        'pixel_art_diffusion_soft_256',
+        'portrait_generator_v001',
+        'pixelartdiffusion4k',
+        'watercolordiffusion',
+        'watercolordiffusion_2',
+        'PulpSciFiDiffusion'
     ]
     diffusion_model = random.choice(the_models)
     print(f'Random model selected is {diffusion_model}')
@@ -2254,7 +2086,6 @@ if diffusion_model == 'random':
 class Diff_Model:
     def __init__(self):
         pass
-
     name: str
     SHA: str
     plink: str
@@ -2285,53 +2116,31 @@ try:
         if user_supplied_name in diffusion_models_file:
             diffusion_model = Diff_Model()
             diffusion_model.name = user_supplied_name
-            diffusion_model.SHA = diffusion_models_file[user_supplied_name][
-                'SHA']
-            diffusion_model.plink = diffusion_models_file[user_supplied_name][
-                'primary_link']
-            if is_json_key_present(settings_file, user_supplied_name,
-                                   'secondary_link'):
-                diffusion_model.slink = diffusion_models_file[
-                    user_supplied_name]['secondary_link']
-            diffusion_model.path = diffusion_models_file[user_supplied_name][
-                'file_name']
-            diffusion_model.attention_resolutions = diffusion_models_file[
-                user_supplied_name]['attention_resolutions']
-            diffusion_model.class_cond = diffusion_models_file[
-                user_supplied_name]['class_cond']
-            diffusion_model.rescale_timesteps = diffusion_models_file[
-                user_supplied_name]['rescale_timesteps']
-            diffusion_model.image_size = diffusion_models_file[
-                user_supplied_name]['image_size']
-            diffusion_model.learn_sigma = diffusion_models_file[
-                user_supplied_name]['learn_sigma']
-            diffusion_model.noise_schedule = diffusion_models_file[
-                user_supplied_name]['noise_schedule']
-            diffusion_model.num_channels = diffusion_models_file[
-                user_supplied_name]['num_channels']
-            if is_json_key_present(diffusion_models_file, user_supplied_name,
-                                   'num_head_channels'):
-                diffusion_model.num_head_channels = diffusion_models_file[
-                    user_supplied_name]['num_head_channels']
-            diffusion_model.num_heads = diffusion_models_file[
-                user_supplied_name]['num_heads']
-            diffusion_model.num_res_blocks = diffusion_models_file[
-                user_supplied_name]['num_res_blocks']
-            diffusion_model.resblock_updown = diffusion_models_file[
-                user_supplied_name]['resblock_updown']
-            diffusion_model.use_scale_shift_norm = diffusion_models_file[
-                user_supplied_name]['use_scale_shift_norm']
-            if is_json_key_present(diffusion_models_file, user_supplied_name,
-                                   'use_fp16'):
+            diffusion_model.SHA = diffusion_models_file[user_supplied_name]['SHA']
+            diffusion_model.plink = diffusion_models_file[user_supplied_name]['primary_link']
+            if is_json_key_present(settings_file, user_supplied_name, 'secondary_link'):
+                diffusion_model.slink = diffusion_models_file[user_supplied_name]['secondary_link']
+            diffusion_model.path = diffusion_models_file[user_supplied_name]['file_name']
+            diffusion_model.attention_resolutions = diffusion_models_file[user_supplied_name]['attention_resolutions']
+            diffusion_model.class_cond = diffusion_models_file[user_supplied_name]['class_cond']
+            diffusion_model.rescale_timesteps = diffusion_models_file[user_supplied_name]['rescale_timesteps']
+            diffusion_model.image_size = diffusion_models_file[user_supplied_name]['image_size']
+            diffusion_model.learn_sigma = diffusion_models_file[user_supplied_name]['learn_sigma']
+            diffusion_model.noise_schedule = diffusion_models_file[user_supplied_name]['noise_schedule']
+            diffusion_model.num_channels = diffusion_models_file[user_supplied_name]['num_channels']
+            if is_json_key_present(diffusion_models_file, user_supplied_name, 'num_head_channels'):
+                diffusion_model.num_head_channels = diffusion_models_file[user_supplied_name]['num_head_channels']
+            diffusion_model.num_heads = diffusion_models_file[user_supplied_name]['num_heads']
+            diffusion_model.num_res_blocks = diffusion_models_file[user_supplied_name]['num_res_blocks']
+            diffusion_model.resblock_updown = diffusion_models_file[user_supplied_name]['resblock_updown']
+            diffusion_model.use_scale_shift_norm = diffusion_models_file[user_supplied_name]['use_scale_shift_norm']
+            if is_json_key_present(diffusion_models_file, user_supplied_name, 'use_fp16'):
                 if fp16_mode == True:
-                    diffusion_model.use_fp16 = diffusion_models_file[
-                        user_supplied_name]['use_fp16']
+                    diffusion_model.use_fp16 = diffusion_models_file[user_supplied_name]['use_fp16']
                 else:
-                    diffusion_model.use_fp16 = False  # Can't use fp16 when in CPU mode
-            if is_json_key_present(diffusion_models_file, user_supplied_name,
-                                   'timestep_respacing'):
-                diffusion_model.timestep_respacing = diffusion_models_file[
-                    user_supplied_name]['timestep_respacing']
+                    diffusion_model.use_fp16 = False # Can't use fp16 when in CPU mode
+            if is_json_key_present(diffusion_models_file, user_supplied_name, 'timestep_respacing'):
+                diffusion_model.timestep_respacing = diffusion_models_file[user_supplied_name]['timestep_respacing']
             else:
                 diffusion_model.timestep_respacing = timestep_respacing
 except Exception as e:
@@ -2361,9 +2170,7 @@ def download_models(diffusion_model, use_secondary_model):
                 model_downloaded = False
 
     if model_downloaded == False:
-        print(
-            f'{diffusion_model.name} Model downloading. This may take a while...'
-        )
+        print(f'{diffusion_model.name} Model downloading. This may take a while...')
         urllib.request.urlretrieve(diffusion_model.plink, model_file)
         if os.path.exists(model_file):
             model_downloaded = True
@@ -2376,9 +2183,7 @@ def download_models(diffusion_model, use_secondary_model):
 
     if model_downloaded == False:
         print('Unable to download the diffusion model.')
-        print(
-            'Please check your diffusion_models.json file for proper formatting,'
-        )
+        print('Please check your diffusion_models.json file for proper formatting,')
         print('Or check the Prog Rock Diffusion github for updated links.')
         quit()
 
@@ -2400,16 +2205,13 @@ def download_models(diffusion_model, use_secondary_model):
             model_secondary_downloaded = True
         else:
             print('First URL failed, using backup if available')
-            urllib.request.urlretrieve(model_secondary_link_fb,
-                                       model_secondary_path)
+            urllib.request.urlretrieve(model_secondary_link_fb, model_secondary_path)
             if os.path.exists(model_secondary_path):
                 model_secondary_downloaded = True
 
     if model_secondary_downloaded == False:
         print('Unable to download the secondary diffusion model.')
-        print(
-            'Please check the Prog Rock Diffusion github for a possible updated version with new links.'
-        )
+        print('Please check the Prog Rock Diffusion github for a possible updated version with new links.')
         quit()
 
 
@@ -2417,52 +2219,32 @@ download_models(diffusion_model, use_secondary_model)
 
 model_config = model_and_diffusion_defaults()
 model_config.update({
-    'attention_resolutions':
-    diffusion_model.attention_resolutions,
-    'class_cond':
-    diffusion_model.class_cond,
-    'diffusion_steps':
-    diffusion_steps,
-    'rescale_timesteps':
-    diffusion_model.rescale_timesteps,
-    'timestep_respacing':
-    diffusion_model.timestep_respacing,
-    'image_size':
-    diffusion_model.image_size,
-    'learn_sigma':
-    diffusion_model.learn_sigma,
-    'noise_schedule':
-    diffusion_model.noise_schedule,
-    'num_channels':
-    diffusion_model.num_channels,
-    'num_head_channels':
-    diffusion_model.num_head_channels,
-    'num_heads':
-    diffusion_model.num_heads,
-    'num_res_blocks':
-    diffusion_model.num_res_blocks,
-    'resblock_updown':
-    diffusion_model.resblock_updown,
-    'use_checkpoint':
-    use_checkpoint,
-    'use_fp16':
-    diffusion_model.use_fp16,
-    'use_scale_shift_norm':
-    diffusion_model.use_scale_shift_norm,
+    'attention_resolutions': diffusion_model.attention_resolutions,
+    'class_cond': diffusion_model.class_cond,
+    'diffusion_steps': diffusion_steps,
+    'rescale_timesteps': diffusion_model.rescale_timesteps,
+    'timestep_respacing': diffusion_model.timestep_respacing,
+    'image_size': diffusion_model.image_size,
+    'learn_sigma': diffusion_model.learn_sigma,
+    'noise_schedule': diffusion_model.noise_schedule,
+    'num_channels': diffusion_model.num_channels,
+    'num_head_channels': diffusion_model.num_head_channels,
+    'num_heads': diffusion_model.num_heads,
+    'num_res_blocks': diffusion_model.num_res_blocks,
+    'resblock_updown': diffusion_model.resblock_updown,
+    'use_checkpoint': use_checkpoint,
+    'use_fp16': diffusion_model.use_fp16,
+    'use_scale_shift_norm': diffusion_model.use_scale_shift_norm,
 })
 
 model_default = model_config['image_size']
 
-
 def load_secondary_model():
     with track_model_vram(device, "secondary model"):
         secondary_model = SecondaryDiffusionImageNet2()
-        secondary_model.load_state_dict(
-            torch.load(f'{model_path}/secondary_model_imagenet_2.pth',
-                       map_location='cpu'))
+        secondary_model.load_state_dict(torch.load(f'{model_path}/secondary_model_imagenet_2.pth', map_location='cpu'))
         secondary_model.eval().requires_grad_(False).to(device)
     return secondary_model
-
 
 def load_lpips_model(net: str = 'vgg'):
     with track_model_vram(device, "LPIPS model"):
@@ -2496,40 +2278,37 @@ model_load_name_map = {
     'RN101_quickgelu_yfcc15m': 'RN101_quickgelu_yfcc15m'
 }
 
+
 clip_managers = [
-    ClipManager(name=model_name,
-                cut_count_multiplier=eval(model_name),
-                device=device,
-                use_cut_heatmap=True,
-                pad_inner_cuts=True) for model_name in CLIP_NAME_MAP.keys()
-    if eval(model_name)
+    ClipManager(
+        name=model_name,
+        cut_count_multiplier=eval(model_name),
+        device=device,
+        use_cut_heatmap=True,
+        pad_inner_cuts=True
+    )
+    for model_name in CLIP_NAME_MAP.keys() if eval(model_name)
 ]
 
-clip_modelname = [
-    model_name for model_name in model_load_name_map.keys()
-    if eval(model_name) > 0.0
-]
-clip_model_weights = [
-    eval(model_name) for model_name in model_load_name_map.keys()
-    if eval(model_name) > 0.0
-]
+clip_modelname = [model_name for model_name in model_load_name_map.keys() if eval(model_name) > 0.0]
+clip_model_weights = [eval(model_name) for model_name in model_load_name_map.keys() if eval(model_name) > 0.0]
 
 # Get corrected sizes
 side_x = (width_height[0] // 64) * 64
 side_y = (width_height[1] // 64) * 64
 if side_x != width_height[0] or side_y != width_height[1]:
-    print(
-        f'Changing output size to {side_x}x{side_y}. Dimensions must by multiples of 64.'
-    )
+    print(f'Changing output size to {side_x}x{side_y}. Dimensions must by multiples of 64.')
 
-estimate_vram_requirements(side_x=side_x,
-                           side_y=side_y,
-                           cut_innercut=cut_innercut,
-                           cut_overview=cut_overview,
-                           clip_model_names=clip_modelname,
-                           diffusion_model_name=diffusion_model.name,
-                           use_secondary=use_secondary_model,
-                           device=device)
+estimate_vram_requirements(
+    side_x=side_x,
+    side_y=side_y,
+    cut_innercut=cut_innercut,
+    cut_overview=cut_overview,
+    clip_model_names=clip_modelname,
+    diffusion_model_name=diffusion_model.name,
+    use_secondary=use_secondary_model,
+    device=device
+)
 lpips_model = load_lpips_model()
 if use_secondary_model:
     secondary_model = load_secondary_model()
@@ -2579,7 +2358,8 @@ if animation_mode == "Video Input":
         '-q:v', '2', '-loglevel', 'error', '-stats',
         f'{videoFramesFolder}/%04d.jpg'
     ],
-                   stdout=subprocess.PIPE).stdout.decode('utf-8')
+        stdout=subprocess.PIPE).stdout.decode('utf-8')
+
 
 if animation_mode == "Video Input":
     max_frames = len(glob(f'{videoFramesFolder}/*.jpg'))
@@ -2685,13 +2465,10 @@ def get_inbetweens(key_frames, integer=False):
     if interp_method == 'Quadratic' and len(key_frames.items()) <= 2:
         interp_method = 'Linear'
 
-    key_frame_series[0] = key_frame_series[
-        key_frame_series.first_valid_index()]
-    key_frame_series[max_frames -
-                     1] = key_frame_series[key_frame_series.last_valid_index()]
+    key_frame_series[0] = key_frame_series[key_frame_series.first_valid_index()]
+    key_frame_series[max_frames - 1] = key_frame_series[key_frame_series.last_valid_index()]
     # key_frame_series = key_frame_series.interpolate(method=intrp_method,order=1, limit_direction='both')
-    key_frame_series = key_frame_series.interpolate(
-        method=interp_method.lower(), limit_direction='both')
+    key_frame_series = key_frame_series.interpolate(method=interp_method.lower(), limit_direction='both')
     if integer:
         return key_frame_series.astype(int)
     return key_frame_series
@@ -2727,48 +2504,56 @@ if key_frames:
     try:
         angle_series = get_inbetweens(parse_key_frames(angle))
     except RuntimeError as e:
-        print("WARNING: You have selected to use key frames, but you have not "
-              "formatted `angle` correctly for key frames.\n"
-              "Attempting to interpret `angle` as "
-              f'"0: ({angle})"\n'
-              "Please read the instructions to find out how to use key frames "
-              "correctly.\n")
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `angle` correctly for key frames.\n"
+            "Attempting to interpret `angle` as "
+            f'"0: ({angle})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
         angle = f"0: ({angle})"
         angle_series = get_inbetweens(parse_key_frames(angle))
 
     try:
         zoom_series = get_inbetweens(parse_key_frames(zoom))
     except RuntimeError as e:
-        print("WARNING: You have selected to use key frames, but you have not "
-              "formatted `zoom` correctly for key frames.\n"
-              "Attempting to interpret `zoom` as "
-              f'"0: ({zoom})"\n'
-              "Please read the instructions to find out how to use key frames "
-              "correctly.\n")
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `zoom` correctly for key frames.\n"
+            "Attempting to interpret `zoom` as "
+            f'"0: ({zoom})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
         zoom = f"0: ({zoom})"
         zoom_series = get_inbetweens(parse_key_frames(zoom))
 
     try:
         translation_x_series = get_inbetweens(parse_key_frames(translation_x))
     except RuntimeError as e:
-        print("WARNING: You have selected to use key frames, but you have not "
-              "formatted `translation_x` correctly for key frames.\n"
-              "Attempting to interpret `translation_x` as "
-              f'"0: ({translation_x})"\n'
-              "Please read the instructions to find out how to use key frames "
-              "correctly.\n")
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `translation_x` correctly for key frames.\n"
+            "Attempting to interpret `translation_x` as "
+            f'"0: ({translation_x})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
         translation_x = f"0: ({translation_x})"
         translation_x_series = get_inbetweens(parse_key_frames(translation_x))
 
     try:
         translation_y_series = get_inbetweens(parse_key_frames(translation_y))
     except RuntimeError as e:
-        print("WARNING: You have selected to use key frames, but you have not "
-              "formatted `translation_y` correctly for key frames.\n"
-              "Attempting to interpret `translation_y` as "
-              f'"0: ({translation_y})"\n'
-              "Please read the instructions to find out how to use key frames "
-              "correctly.\n")
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `translation_y` correctly for key frames.\n"
+            "Attempting to interpret `translation_y` as "
+            f'"0: ({translation_y})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
         translation_y = f"0: ({translation_y})"
         translation_y_series = get_inbetweens(parse_key_frames(translation_y))
 
@@ -2805,8 +2590,7 @@ if type(intermediate_saves) is list:
 # Save partial run at certain divisions of total steps
 if type(intermediate_saves) is not list:
     if intermediate_saves:
-        steps_per_checkpoint = math.floor(
-            (steps - skip_steps - 1) // (intermediate_saves + 1))
+        steps_per_checkpoint = math.floor((steps - skip_steps - 1) // (intermediate_saves + 1))
         steps_per_checkpoint = steps_per_checkpoint if steps_per_checkpoint > 0 else 1
         print(f'Will save every {steps_per_checkpoint} steps')
     else:
@@ -2847,26 +2631,21 @@ if resume_run:
         try:
             batchNum
         except:
-            batchNum = len(
-                glob(f"{batchFolder}/{batch_name}(*)_settings.json")) - 1
+            batchNum = len(glob(f"{batchFolder}/{batch_name}(*)_settings.json")) - 1
     else:
         batchNum = int(run_to_resume)
     if resume_from_frame == 'latest':
-        start_frame = len(
-            glob(batchFolder + f"/{batch_name}({batchNum})_*.png"))
+        start_frame = len(glob(batchFolder + f"/{batch_name}({batchNum})_*.png"))
     else:
         start_frame = int(resume_from_frame) + 1
         if retain_overwritten_frames is True:
-            existing_frames = len(
-                glob(batchFolder + f"/{batch_name}({batchNum})_*.png"))
+            existing_frames = len(glob(batchFolder + f"/{batch_name}({batchNum})_*.png"))
             frames_to_save = existing_frames - start_frame
             print(f'Moving {frames_to_save} frames to the Retained folder')
             move_files(start_frame, existing_frames, batchFolder, retainFolder)
 else:
     if "_" in batch_name:
-        print(
-            f'Replacing _ with - in batch_name to keep file numbering logic from exploding.'
-        )
+        print(f'Replacing _ with - in batch_name to keep file numbering logic from exploding.')
         batch_name = batch_name.replace('_', '-')
     start_frame = 0
     #batchNum = len(glob(batchFolder + "/*.json"))
@@ -2877,7 +2656,7 @@ else:
     for file in files:
         if batch_name in file and ".json" in file:
             start = file.index('_')
-            end = file.index('_', start + 1)
+            end = file.index('_', start+1)
             filenum = int(file[(start + 1):end])
             filenums.append(filenum)
     if not filenums:
@@ -2906,6 +2685,7 @@ if type(clip_guidance_scale) != str:
     clip_guidance_scale = num_to_schedule(clip_guidance_scale)
 
 print(f'Using seed {seed}')
+
 
 # Leave this section alone, it takes all our settings and puts them in one variable dictionary
 args = {
@@ -2997,14 +2777,7 @@ if smooth_schedules == True:
 
 if cl_args.gobiginit == None:
     model, diffusion = create_model_and_diffusion(**model_config)
-    if diffusion_model.name == 'FeiArt_Handpainted_CG_Diffusion':
-        model.load_state_dict(torch.load(
-            f'{model_path}/{diffusion_model.path}', map_location='cpu'),
-                              strict=False)
-    else:
-        model.load_state_dict(
-            torch.load(f'{model_path}/{diffusion_model.path}',
-                       map_location='cpu'))
+    model.load_state_dict(torch.load(f'{model_path}/{diffusion_model.path}', map_location='cpu'))
     model.requires_grad_(False).eval()
     for name, param in model.named_parameters():
         if 'qkv' in name or 'norm' in name or 'proj' in name:
@@ -3027,11 +2800,8 @@ slices_todo = 0  # we want 5 total slices for a 2x increase, 4 to match the tota
 def addalpha(im, mask):
     imr, img, imb, ima = im.split()
     mmr, mmg, mmb, mma = mask.split()
-    im = Image.merge('RGBA', [
-        imr, img, imb, mma
-    ])  # we want the RGB from the original, but the transparency from the mask
-    return (im)
-
+    im = Image.merge('RGBA', [imr, img, imb, mma])  # we want the RGB from the original, but the transparency from the mask
+    return(im)
 
 # take a source image and layer in the slices on top
 
@@ -3049,7 +2819,6 @@ def mergeimgs(source, slices):
             paste_x += slice_width
     return source
 
-
 # Slices an image into the configured number of chunks. Overlap is currently 64px but should become dynamic
 # Also slices render_masks to match
 def slice(source, rmask):
@@ -3063,8 +2832,7 @@ def slice(source, rmask):
     i = 0
     if gobig_vertical == True:
         slice_width = int(width / slices_todo)
-        slice_width = 64 * math.floor(
-            slice_width / 64)  # round slice width down to the nearest 64
+        slice_width = 64 * math.floor(slice_width / 64)  # round slice width down to the nearest 64
         remainder = width - (slice_width * slices_todo)
         while remainder > 0:
             slices_todo += 1
@@ -3098,41 +2866,31 @@ try:
             if cl_args.gobig_slices:
                 slices_todo = cl_args.gobig_slices
             else:
-                slices_todo = (
-                    gobig_scale * gobig_scale
-                ) + 1  # we want 5 total slices for a 2x increase, 4 to match the total pixel increase + 1 to cover overlap
-            temp_args = SimpleNamespace(
-                **vars(args)
-            )  # make a backup copy of args so we can reset it after gobig
+                slices_todo = (gobig_scale * gobig_scale) + 1  # we want 5 total slices for a 2x increase, 4 to match the total pixel increase + 1 to cover overlap
+            temp_args = SimpleNamespace(**vars(args))  # make a backup copy of args so we can reset it after gobig
             if cl_args.cuda != '0':
                 progress_image = (f'progress{cl_args.cuda}.png')
             else:
                 progress_image = 'progress.png'
             # grab the init image and make it our progress image
             if cl_args.gobiginit is not None:
-                shutil.copy(init_image, progress_image)
+                shutil.copy(init_image, progress_image)                
             # Setup some filenames
             if cl_args.cuda != '0':  # handle if a different GPU is in use
                 slice_image = (f'slice{cl_args.cuda}.png')
                 slice_rmask = (f'slice_rmask{cl_args.cuda}.png')
-                final_output_image = (
-                    f'{batchFolder}/{batch_name}_go_big_{cl_args.cuda}_{batchNum}_{batch_image}.png'
-                )
+                final_output_image = (f'{batchFolder}/{batch_name}_go_big_{cl_args.cuda}_{batchNum}_{batch_image}.png')
             else:
 
                 slice_image = 'slice.png'
                 slice_rmask = 'slice_rmask.png'
-                final_output_image = (
-                    f'{batchFolder}/{batch_name}_go_big_{batchNum}_{batch_image}.png'
-                )
+                final_output_image = (f'{batchFolder}/{batch_name}_go_big_{batchNum}_{batch_image}.png')
 
             # To keep things simple (hah), we'll create a fully white render_mask to use in the case that there's no provided render_mask
             # that way there's going to be a render_mask no matter what, and we don't have to keep checking for it
             # And just to keep everyone on their toes, a render_mask is is for telling do_run where to render/not render, while a mask is for gobig to blend slices
             if render_mask is None:
-                source_render_mask = Image.new('RGBA',
-                                               (args.side_x, args.side_y),
-                                               color=(255, 255, 255))
+                source_render_mask = Image.new('RGBA', (args.side_x, args.side_y), color = (255,255,255))
             else:
                 source_render_mask = Image.open(render_mask).convert('RGBA')
 
@@ -3141,14 +2899,12 @@ try:
                 input_image = Image.open(progress_image).convert('RGBA')
                 reside_x = side_x * gobig_scale
                 reside_y = side_y * gobig_scale
-                source_image = input_image.resize((reside_x, reside_y),
-                                                  get_resampling_mode())
+                source_image = input_image.resize((reside_x, reside_y), get_resampling_mode())
                 input_image.close()
-                source_render_mask = source_render_mask.resize(
-                    (reside_x, reside_y), get_resampling_mode())
+                source_render_mask = source_render_mask.resize((reside_x, reside_y), get_resampling_mode())
             else:
                 source_image = Image.open(progress_image).convert('RGBA')
-
+            
             # Slice source_image into overlapping slices
             slices = slice(source_image, source_render_mask)
             # Run PRD again for each slice, with proper init image paramaters, etc.
@@ -3159,15 +2915,7 @@ try:
                 args.seed = seed
                 # Reset underlying systems for another run
                 model, diffusion = create_model_and_diffusion(**model_config)
-                if diffusion_model.name == 'FeiArt_Handpainted_CG_Diffusion':
-                    model.load_state_dict(torch.load(
-                        f'{model_path}/{diffusion_model.path}',
-                        map_location='cpu'),
-                                          strict=False)
-                else:
-                    model.load_state_dict(
-                        torch.load(f'{model_path}/{diffusion_model.path}',
-                                   map_location='cpu'))
+                model.load_state_dict(torch.load(f'{model_path}/{diffusion_model.path}', map_location='cpu'))
                 model.requires_grad_(False).eval().to(device)
                 for name, param in model.named_parameters():
                     if 'qkv' in name or 'norm' in name or 'proj' in name:
@@ -3194,9 +2942,7 @@ try:
                 side_x, side_y = chunk.size
                 args.fix_brightness_contrast = False
                 do_run(batch_image, i)
-                print(
-                    f'Finished slice, grabbing {progress_image} and adding it to betterslices.'
-                )
+                print(f'Finished slice, grabbing {progress_image} and adding it to betterslices.')
                 resultslice = Image.open(progress_image).convert('RGBA')
                 betterslices.append(resultslice.copy())
                 resultslice.close()
@@ -3213,8 +2959,7 @@ try:
                         alpha_gradient.putpixel((x, 0), a)
                     else:
                         alpha_gradient.putpixel((x, 0), 255)
-                alpha = alpha_gradient.resize(betterslices[0].size,
-                                              Image.Resampling.BICUBIC)
+                alpha = alpha_gradient.resize(betterslices[0].size, Image.Resampling.BICUBIC)
             # add the generated alpha channel to a mask image
             mask = Image.new('RGBA', (args.side_x, args.side_y), color=0)
             mask.putalpha(alpha)
@@ -3225,11 +2970,9 @@ try:
             # Once we have all our images, mergeimgs back onto source.png, then save
             final_output = mergeimgs(source_image, betterslices)
             final_output.save(final_output_image)
-            print(
-                f'\n\nGO BIG is complete!\n\n ***** NOTE *****\nYour output is saved as {final_output_image}!'
-            )
+            print(f'\n\nGO BIG is complete!\n\n ***** NOTE *****\nYour output is saved as {final_output_image}!')
             # set everything back for the next image in the batch
-            args = temp_args
+            args = temp_args            
         gc.collect()
         if "cuda" in str(device):
             with torch.cuda.device(device):
@@ -3282,10 +3025,12 @@ if skip_video_for_run_all == False:
         '-pix_fmt', 'yuv420p', '-crf', '17', '-preset', 'very ', filepath
     ]
 
-    process = subprocess.Popen(cmd,
-                               cwd=f'{batchFolder}',
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        cmd,
+        cwd=f'{batchFolder}',
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
     stdout, stderr = process.communicate()
     if process.returncode != 0:
         print(stderr)
