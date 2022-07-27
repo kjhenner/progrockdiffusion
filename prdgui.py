@@ -2,6 +2,7 @@ from tkinter import *
 import sys
 import os
 import json5 as json
+import shutil
 import threading
 import shlex
 import subprocess
@@ -19,6 +20,9 @@ if os.path.exists('gui_settings.json'):
 else:
     json_set = json.load(open('settings.json'))
     print("Default settings loaded")
+
+is_running = False
+has_run = False
 
 class Redirect():
 
@@ -127,11 +131,19 @@ def save_text():
         json.dump(json_set, outfile)
 
 def run_thread():
-    show_image()
-    save_text()
-    global runThread
-    runThread = threading.Thread(target=do_run)
-    runThread.start()
+    global is_running
+    if is_running == False:
+        is_running = True
+        if has_run == False:
+            show_image()
+        else:
+            canvas.itemconfig(image_container, image='')
+        save_text()
+        global runThread
+        runThread = threading.Thread(target=do_run)
+        runThread.start()
+    else:
+        print("Already running")
 
 def do_run():
     p = subprocess.Popen(shlex.split('python prd.py -s gui_settings.json '+extra_args_text.get()), stdout=subprocess.PIPE, text=True)
@@ -151,30 +163,36 @@ def do_run():
     # os.system('python prd.py -s gui_settings.json '+extra_args_text.get())
 
 def show_image():
-    master_frame.pack()
-    im = Image.open('progress.png')
-    global h
-    global w
-    h = im.size[1]
-    w = im.size[0]
-    global image_window
-    image_window = Frame(master_frame, width=w, height=h)
-    image_window.pack()
-    global canvas
-    canvas = Canvas(image_window, width=w, height=h)
-    global img
-    global image_container
-    img = PhotoImage(file="progress.png")
-    image_container = canvas.create_image(0,0, anchor="nw",image=img)
-    canvas.pack()
-    updater()   
+    if is_running == True:
+        return
+    else:
+        shutil.copyfile('progress.png', 'progress_done.png')
+        master_frame.pack()
+        im = Image.open('progress_done.png')
+        global h
+        global w
+        h = im.size[1]
+        w = im.size[0]
+        global image_window
+        image_window = Frame(master_frame, width=w, height=h)
+        image_window.pack()
+        global canvas
+        canvas = Canvas(image_window, width=w, height=h)
+        global img
+        global image_container
+        img = PhotoImage(file="progress_done.png")
+        image_container = canvas.create_image(0,0, anchor="nw",image=img)
+        canvas.pack()
+        updater()   
 
 def updater():
     window.after(1000, refresh_image)
 
 def refresh_image():
+    global is_running
     updater()
     if runThread.is_alive():
+        is_running = True
         try:
             im = Image.open('progress.png')
             global h
@@ -190,12 +208,25 @@ def refresh_image():
             canvas.config(width=w, height=h)
             canvas.itemconfig(image_container, image = img)
             canvas.pack()
+            global has_run
+            has_run = True
         except:
             pass
     else:
-        image_container.destroy()
-        canvas.destroy()
-        image_window.destroy()
+        is_running = False
+        try:
+            shutil.copyfile('progress.png', 'progress_done.png')
+            im = Image.open('progress_done.png')
+            if h != im.size[1] or w != im.size[0]:
+                h = im.size[1]
+                w = im.size[0]
+                image_window.config(width=w, height=h)
+            img = PhotoImage(file="progress_done.png")
+            canvas.config(width=w, height=h)
+            canvas.itemconfig(image_container, image = img)
+            canvas.pack()
+        except:
+            pass
 
 window = Tk()
 
