@@ -327,7 +327,7 @@ def parse_args():
         '--gui',
         action='store_true',
         required=False,
-        help='Use the PyQt5 GUI'
+        help='(deprecated, please invoke the gui separately)'
     )
 
     my_parser.add_argument(
@@ -858,11 +858,6 @@ except:
 if cl_args.hidemetadata or environ_hidemetadata:
     add_metadata = False
     print(f'Hide metadata flag is ON, settings will not be stored in the PNG output.')
-
-gui = False
-if cl_args.gui:
-    gui = True
-    import prdgui
 
 letsgobig = False
 gobig_vertical = False
@@ -1794,9 +1789,6 @@ def do_run(batch_num, slice_num=-1):
                             progressBar.write(f'Image finished. Using seed {seed + batch_num} for next image.')
 
                     do_weights(steps - cur_t - 1, clip_managers)
-
-                if (gui):
-                    prdgui.update_image(image)
 
                 do_weights(steps - cur_t - 1, clip_managers)
 
@@ -2986,8 +2978,6 @@ def grid_coords(target, original, overlap):
     for coords in lx_list[::-1]:
         result.append(coords)
     result.append(center[0])
-    for coords in result:
-        print(coords)
     return result
 
 # Alternative method uses a grid of images that each equal the size of the original render
@@ -3010,8 +3000,8 @@ def grid_slice(source, og_size=None): # rmask=None, imask=None,
 
 # FINALLY DO THE RUN
 try:
-    if (gui):
-        print("The GUI should be invoked separately via 'python prdgui.py'")
+    if (cl_args.gui):
+        print("Using the gui this way is deprecated. Invoke it first with 'python prdgui.py'")
     print(f'\nStarting batch!')
     for batch_image in range(n_batches):
         og_size = (side_x, side_y)
