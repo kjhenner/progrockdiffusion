@@ -273,6 +273,11 @@ You can add up to 4 prompts with different weights. The "Save Settings" button s
 Make sure you select at least one CLIP Model. I also recommend naming your batch, and changing the display rate to 1. 
 If you need to cancel the render, you will have to kill the shell window you used to open the GUI.
 
+The final text box is for extra shell arguments. They will be parsed after the initial command:
+```
+python prd.py -s gui_settings.json <YOUR ARGS GO HERE>
+```
+
 ## [Windows]
 ```
 conda activate progrockdiffusion
