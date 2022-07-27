@@ -2076,7 +2076,9 @@ if diffusion_model == 'random':
         'pixelartdiffusion4k',
         'watercolordiffusion',
         'watercolordiffusion_2',
-        'PulpSciFiDiffusion'
+        'PulpSciFiDiffusion',
+        'FeiArt_Handpainted_CG_Diffusion',
+        'IsometricDiffusionRevrart512px'
     ]
     diffusion_model = random.choice(the_models)
     print(f'Random model selected is {diffusion_model}')
