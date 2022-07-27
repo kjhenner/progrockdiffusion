@@ -143,19 +143,22 @@ def run_thread():
         print("Already running")
 
 def do_run():
+    global is_running
     p = subprocess.Popen(shlex.split('python prd.py -s gui_settings.json '+extra_args_text.get()), stdout=subprocess.PIPE, text=True)
     while p.poll() is None:
        msg = p.stdout.readline().split()
        if msg:
-            print(msg)
+            print(' '.join(msg))
     window.update()
     start = time()
     last_update= time()
     while (time() - start) <= 5:
         current = time()
-        if (current-last_update)> 0.025:
+        if (current-last_update)> 0.025 and is_running == True:
             last_update = current
             window.update()
+        else:
+            pass
                 
     # os.system('python prd.py -s gui_settings.json '+extra_args_text.get())
 
