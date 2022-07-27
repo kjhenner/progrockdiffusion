@@ -126,6 +126,14 @@ createPath(outDirPath)
 model_path = f'{root_path}/models'
 createPath(model_path)
 
+if os.getenv("CACHE_CLIP_MODELS"):
+    model_path_clip = model_path
+else:
+    home_dir = os.path.expanduser('~')
+    model_path_clip = os.path.join(home_dir, ".cache", "clip")
+    print(f'Setting CLIP download directory to {model_path_clip}')
+
+
 model_256_downloaded = False
 model_512_downloaded = False
 model_secondary_downloaded = False
@@ -850,19 +858,6 @@ except:
 if cl_args.hidemetadata or environ_hidemetadata:
     add_metadata = False
     print(f'Hide metadata flag is ON, settings will not be stored in the PNG output.')
-
-# # Use PRD's model folder to store CLIP models if CLIP_MODEL_CACHE environment variable is set to False.
-# try:
-#     environ_clip_model_cache = os.environ.get('CLIP_MODEL_CACHE')
-# except:
-#     environ_clip_model_cache = None
-
-# if environ_clip_model_cache is not None:
-#     clip_model_path = model_path
-# else:
-#     clip_model_path = "~/.cache/clip"
-
-# print(f'Clip model path is {clip_model_path}')
 
 gui = False
 if cl_args.gui:
@@ -2354,6 +2349,7 @@ clip_managers = [
     ClipManager(
         name=model_name,
         cut_count_multiplier=eval(model_name),
+        download_root=model_path_clip,
         device=device,
         use_cut_heatmap=True,
         pad_inner_cuts=True
