@@ -131,14 +131,11 @@ def save_text():
         json.dump(json_set, outfile)
 
 def run_thread():
-    global is_running
+    if has_run == False:
+        show_image()
+    save_text()
     if is_running == False:
-        is_running = True
-        if has_run == False:
-            show_image()
-        else:
-            canvas.itemconfig(image_container, image='')
-        save_text()
+        canvas.itemconfig(image_container, image='')
         global runThread
         runThread = threading.Thread(target=do_run)
         runThread.start()
