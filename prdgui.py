@@ -174,7 +174,7 @@ def show_image():
         h = im.size[1]
         w = im.size[0]
         global image_window
-        image_window = Frame(master_frame, width=w, height=h)
+        image_window = Frame(right_frame, width=w, height=h)
         image_window.pack()
         global canvas
         canvas = Canvas(image_window, width=w, height=h)
@@ -236,16 +236,22 @@ master_frame.pack(fill=BOTH, expand=1)
 left_frame = Frame(master_frame)
 left_frame.pack(side=LEFT, fill=BOTH, expand=1)
 
-left_frame2 = Frame(window, height=100)
-left_frame2.pack(side=LEFT, fill=X, expand=1)
+left_frame1 = Frame(left_frame, bg='Light Blue', bd=3, relief=RIDGE)
+left_frame1.grid(row=0, column=0, sticky=N+S+E+W)
 
-frame1 = Frame(left_frame, bg='Light Green', bd=2, relief=FLAT)
+left_frame2 = Frame(left_frame, height=100)
+left_frame2 .grid(row=1, column=0, sticky=N+S+E+W)
+
+right_frame = Frame(master_frame)
+right_frame.pack(side=RIGHT, fill=BOTH, expand=1)
+
+frame1 = Frame(left_frame1, bg='Light Green', bd=2, relief=FLAT)
 frame1.grid(row=0, column=0, sticky=NSEW)
 
-frame2 = Frame(left_frame, bg='Light Yellow', bd=2, relief=FLAT)
+frame2 = Frame(left_frame1, bg='Light Yellow', bd=2, relief=FLAT)
 frame2.grid(row=1, column=0, sticky=NSEW)
 
-frame3 = Frame(left_frame, bg='Light Blue', bd=2, relief=FLAT)
+frame3 = Frame(left_frame1, bg='Light Blue', bd=2, relief=FLAT)
 frame3.grid(row=2, column=0, sticky=NSEW)
 
 prompt1 = Label(frame3, text='Prompt 1')
