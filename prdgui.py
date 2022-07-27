@@ -1,8 +1,12 @@
-from msilib.schema import CheckBox
 from tkinter import *
+import sys
 import os
 import json5 as json
+import shutil
 import threading
+import shlex
+import subprocess
+from time import *
 from PIL import ImageTk,Image
 
 if os.path.exists('gui_settings.json'):
@@ -17,15 +21,36 @@ else:
     json_set = json.load(open('settings.json'))
     print("Default settings loaded")
 
+is_running = False
+has_run = False
+
+class Redirect():
+
+    def __init__(self, widget, autoscroll=True):
+        self.widget = widget
+        self.autoscroll = autoscroll
+
+    def write(self, text):
+        self.widget.insert('end', text)
+        if self.autoscroll:
+            self.widget.see("end")  # autoscroll
+        
+    def flush(self):
+        pass
+
+
 def get_num(derp):
     num = IntVar()
     num.set(json_set[derp])
     return num
 
 def get_text(derp):
-    text = StringVar()
-    text.set(json_set[derp])
-    return text
+    try:
+        text = StringVar()
+        text.set(json_set[derp])
+        return text
+    except:
+        return ''
 
 def get_prompt(x):
     text = StringVar()
@@ -90,6 +115,8 @@ def save_text():
     json_set['symmetry_loss_h'] = x
     x = symm_switch_text.get()
     json_set['symm_switch'] = x
+    x = extra_args_text.get()
+    json_set['extra_args'] = x
     prompt_text = []
     if prompt_text1.get() != '':
         prompt_text.append(prompt_text1.get())
@@ -104,59 +131,122 @@ def save_text():
         json.dump(json_set, outfile)
 
 def run_thread():
+    if has_run == False:
+        show_image()
     save_text()
-    runThread = threading.Thread(target=do_run)
-    runThread.start()
+    if is_running == False:
+        canvas.itemconfig(image_container, image='')
+        global runThread
+        runThread = threading.Thread(target=do_run)
+        runThread.start()
+    else:
+        print("Already running")
 
 def do_run():
-    show_image()
-    os.system('python prd.py -s gui_settings.json')
+    global is_running
+    p = subprocess.Popen(shlex.split('python prd.py -s gui_settings.json '+extra_args_text.get()), stdout=subprocess.PIPE, text=True)
+    while p.poll() is None:
+       msg = p.stdout.readline().split()
+       if msg:
+            print(' '.join(msg))
+    window.update()
+    start = time()
+    last_update= time()
+    while (time() - start) <= 5:
+        current = time()
+        if (current-last_update)> 0.025 and is_running == True:
+            last_update = current
+            window.update()
+        else:
+            pass
+                
+    # os.system('python prd.py -s gui_settings.json '+extra_args_text.get())
 
 def show_image():
-    w = json_set['width']
-    h = json_set['height']
-    image_window = Frame(master_frame, width=w, height=h)
-    image_window.grid(row=0, column=100)
-    global canvas
-    canvas = Canvas(image_window, width=w, height=h)
-    global img
-    global image_container
-    img = PhotoImage(file="progress.png")
-    image_container = canvas.create_image(0,0, anchor="nw",image=img)
-    canvas.pack()
-    updater()   
+    if is_running == True:
+        return
+    else:
+        shutil.copyfile('progress.png', 'progress_done.png')
+        master_frame.pack()
+        im = Image.open('progress_done.png')
+        global h
+        global w
+        h = im.size[1]
+        w = im.size[0]
+        global image_window
+        image_window = Frame(master_frame, width=w, height=h)
+        image_window.pack()
+        global canvas
+        canvas = Canvas(image_window, width=w, height=h)
+        global img
+        global image_container
+        img = PhotoImage(file="progress_done.png")
+        image_container = canvas.create_image(0,0, anchor="nw",image=img)
+        canvas.pack()
+        updater()   
 
 def updater():
     window.after(1000, refresh_image)
 
 def refresh_image():
+    global is_running
     updater()
-    try:
-        global img
-        global image_container
-        global canvas
-        img = PhotoImage(file="progress.png")
-        canvas.itemconfig(image_container, image = img)
-    except:
-        pass
+    if runThread.is_alive():
+        is_running = True
+        try:
+            im = Image.open('progress.png')
+            global h
+            global w
+            if h != im.size[1] or w != im.size[0]:
+                h = im.size[1]
+                w = im.size[0]
+                image_window.config(width=w, height=h)
+            global img
+            global image_container
+            global canvas
+            img = PhotoImage(file="progress.png")
+            canvas.config(width=w, height=h)
+            canvas.itemconfig(image_container, image = img)
+            canvas.pack()
+            global has_run
+            has_run = True
+        except:
+            pass
+    else:
+        is_running = False
+        try:
+            shutil.copyfile('progress.png', 'progress_done.png')
+            im = Image.open('progress_done.png')
+            if h != im.size[1] or w != im.size[0]:
+                h = im.size[1]
+                w = im.size[0]
+                image_window.config(width=w, height=h)
+            img = PhotoImage(file="progress_done.png")
+            canvas.config(width=w, height=h)
+            canvas.itemconfig(image_container, image = img)
+            canvas.pack()
+        except:
+            pass
 
 window = Tk()
 
 master_frame = Frame(bg='Light Blue', bd=3, relief=RIDGE)
-master_frame.grid(sticky=NSEW)
-master_frame.columnconfigure(0, weight=1)
+master_frame.pack(fill=BOTH, expand=1)
 
 left_frame = Frame(master_frame)
-left_frame.grid(row=0, column=0, sticky=NSEW)
+left_frame.pack(side=LEFT, fill=BOTH, expand=1)
+
+left_frame2 = Frame(window, height=100)
+left_frame2.pack(side=LEFT, fill=X, expand=1)
 
 frame1 = Frame(left_frame, bg='Light Green', bd=2, relief=FLAT)
-frame1.grid(row=1, column=0, sticky=NW)
+frame1.grid(row=0, column=0, sticky=NSEW)
 
 frame2 = Frame(left_frame, bg='Light Yellow', bd=2, relief=FLAT)
-frame2.grid(row=2, column=0, sticky=NW)
+frame2.grid(row=1, column=0, sticky=NSEW)
 
 frame3 = Frame(left_frame, bg='Light Blue', bd=2, relief=FLAT)
-frame3.grid(row=3, column=0, sticky=NW) 
+frame3.grid(row=2, column=0, sticky=NSEW)
 
 prompt1 = Label(frame3, text='Prompt 1')
 prompt1.grid(row=1, column=0, pady=5, padx=2, sticky=NW)
@@ -329,7 +419,13 @@ diffusion_model = Label(frame1, text='Diffusion Model:')
 diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
 
 diffusion_model_text = get_text('diffusion_model')
-diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120', '256x256_openai_comics_faces_by_alex_spirin', '256x256_diffusion_uncond', 'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256', 'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion')
+diffusion_model_drop = OptionMenu(
+    frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120',
+    '256x256_openai_comics_faces_by_alex_spirin', '256x256_diffusion_uncond',
+    'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256',
+    'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion',
+    'watercolordiffusion_2', 'PulpSciFiDiffusion',
+    'FeiArt_Handpainted_CG_Diffusion', 'IsometricDiffusionRevrart512px')
 diffusion_model_drop.grid(row=1, column=7, pady=5, padx=2, sticky=NW)
 
 set_seed = Label(frame1, text='Set Seed:')
@@ -366,9 +462,35 @@ symm_switch.grid(row=4, column=9, pady=5, padx=2, sticky=NW)
 symm_switch_text = Entry(frame2, textvariable=get_text('symm_switch'), width=12)
 symm_switch_text.grid(row=4, column=10, pady=5, padx=2, sticky=NW)
 
+extra_args = Label(frame3, text='Extra Args: (Advanced use only. Ex: --gobig)')
+extra_args.grid(row=9, column=0, pady=5, padx=2, sticky=NW)
+
+extra_args_text = Entry(frame3, textvariable=get_text('extra_args'), width=150)
+extra_args_text.grid(row=10, column=0, pady=5, padx=2, sticky=NW)
+
 save = Button(frame2,text='Save Settings', command=save_text).grid(row=4, column=11, pady=5, padx=2)
 run = Button(frame2,text='Run', command=run_thread).grid(row=5, column=11, pady=5, padx=2)
 
-window.title('ProgRockDiffusion (PRD): '+json_set['batch_name'])
+frame = Frame(left_frame2, height=150)
+frame.pack_propagate(0)
+frame.pack(expand=True, fill='both')
+
+text = Text(frame, height=150)
+text.pack(side='left', fill='both', expand=True)
+
+scrollbar = Scrollbar(frame)
+scrollbar.pack(side='right', fill='y')
+
+text['yscrollcommand'] = scrollbar.set
+scrollbar['command'] = text.yview
+
+old_stdout = sys.stdout    
+sys.stdout = Redirect(text)
+
+window.title('ProgRockDiffusion (PRD GUI): '+json_set['batch_name'])
 
 window.mainloop()
+
+# - after close window -
+
+sys.stdout = old_stdout
