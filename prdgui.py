@@ -419,7 +419,13 @@ diffusion_model = Label(frame1, text='Diffusion Model:')
 diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
 
 diffusion_model_text = get_text('diffusion_model')
-diffusion_model_drop = OptionMenu(frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120', '256x256_openai_comics_faces_by_alex_spirin', '256x256_diffusion_uncond', 'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256', 'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion', 'watercolordiffusion_2', 'PulpSciFiDiffusion')
+diffusion_model_drop = OptionMenu(
+    frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120',
+    '256x256_openai_comics_faces_by_alex_spirin', '256x256_diffusion_uncond',
+    'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256',
+    'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion',
+    'watercolordiffusion_2', 'PulpSciFiDiffusion',
+    'FeiArt_Handpainted_CG_Diffusion', 'IsometricDiffusionRevrart512px')
 diffusion_model_drop.grid(row=1, column=7, pady=5, padx=2, sticky=NW)
 
 set_seed = Label(frame1, text='Set Seed:')
