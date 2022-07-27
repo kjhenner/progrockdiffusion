@@ -129,6 +129,7 @@ def save_text():
 def run_thread():
     show_image()
     save_text()
+    global runThread
     runThread = threading.Thread(target=do_run)
     runThread.start()
 
@@ -173,23 +174,28 @@ def updater():
 
 def refresh_image():
     updater()
-    try:
-        im = Image.open('progress.png')
-        global h
-        global w
-        if h != im.size[1] or w != im.size[0]:
-            h = im.size[1]
-            w = im.size[0]
-            image_window.config(width=w, height=h)
-        global img
-        global image_container
-        global canvas
-        img = PhotoImage(file="progress.png")
-        canvas.config(width=w, height=h)
-        canvas.itemconfig(image_container, image = img)
-        canvas.pack()
-    except:
-        pass
+    if runThread.is_alive():
+        try:
+            im = Image.open('progress.png')
+            global h
+            global w
+            if h != im.size[1] or w != im.size[0]:
+                h = im.size[1]
+                w = im.size[0]
+                image_window.config(width=w, height=h)
+            global img
+            global image_container
+            global canvas
+            img = PhotoImage(file="progress.png")
+            canvas.config(width=w, height=h)
+            canvas.itemconfig(image_container, image = img)
+            canvas.pack()
+        except:
+            pass
+    else:
+        image_container.destroy()
+        canvas.destroy()
+        image_window.destroy()
 
 window = Tk()
 
