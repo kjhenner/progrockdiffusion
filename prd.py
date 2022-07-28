@@ -1433,7 +1433,7 @@ def do_run(batch_num, slice_num=-1):
             for clip_manager in clip_managers:
                 # We should probably let the clip_manager manage its own state
                 # but do this for now.
-                if sample_prompt:
+                if sample_prompt and print_sample_prompt: # only need to do this if the prompt has changed
                     prompt_embeds, prompt_weights = clip_manager.embed_text_prompts(
                         prompts=sample_prompt,
                         step=s,
@@ -1442,7 +1442,7 @@ def do_run(batch_num, slice_num=-1):
                     )
                     clip_manager.prompt_embeds = prompt_embeds
                     clip_manager.prompt_weights = prompt_weights
-                if image_prompts:  # why image_prompts instead of sample_image_prompt?
+                if sample_image_prompt and print_sample_image_prompt: # only need to do this if the prompt has changed
                     img_prompt_embeds, img_prompt_weights = clip_manager.embed_image_prompts(
                         prompts=sample_image_prompt,
                         step=s,

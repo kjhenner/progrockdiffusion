@@ -91,7 +91,7 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **symm_switch** | 45 | what step to stop doing symmetry mode
 | **stop_early** | 0 | stop processing your image at a certain step
 | **use_jpg** | false | Save images as jpg rather than PNG (save disk space at cost of image quality)
-| **cool_down** | 0 | how many seconds to pause between images in a batch (give your GPU a chance to cool off a bit)
+| **cool_down** | 0 | total # of idle seconds to add to your render, which will be divided between the steps, to let your GPU cool off.
 
 ## Text Prompts
 There are a handful of techniques available within Text Prompts. Here are a few examples:
