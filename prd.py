@@ -3035,7 +3035,7 @@ try:
                 progress_image = 'progress.png'
             # grab the init image and make it our progress image
             if cl_args.gobiginit is not None:
-                    shutil.copy(init_image, progress_image)                
+                shutil.copy(init_image, progress_image)                
             # Setup some filenames
             if cl_args.cuda != '0':  # handle if a different GPU is in use
                 slice_image = (f'slice{cl_args.cuda}.png')
