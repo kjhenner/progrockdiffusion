@@ -1366,7 +1366,7 @@ def do_run(batch_num, slice_num=-1):
 
         if args.cool_down >= 1:
             cooling_delay = round((args.steps / args.cool_down),2)
-            print(f'Adding {cooling_delay} a second pause between steps for cool down (total of {args.cool_down} seconds).')
+            print(f'Adding {args.cool_down} seconds of cool down time ({cooling_delay} per step).')
         
         # Use next prompt in series when doing a batch run
         if animation_mode == "None":
@@ -3000,16 +3000,12 @@ def grid_coords(target, original, overlap):
 # Alternative method uses a grid of images that each equal the size of the original render
 def grid_slice(source, overlap, og_size=None): # rmask=None, imask=None,
     width, height = og_size
-    canvas_width, canvas_height = source.size
     coordinates = grid_coords(source.size, og_size, overlap)
     # loc_width and loc_height are the center point of the goal size, and we'll start there and work our way out
     slices = []
     for coordinate in coordinates:
         x, y = coordinate
         slices.append(((source.crop((x, y, x+width, y+height))), x, y))
-    for count, slice in enumerate(slices):
-        image, x, y = slice
-        image.save(f'slice{count}.png')
     global slices_todo
     slices_todo = len(slices) - 1
     return slices
