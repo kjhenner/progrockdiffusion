@@ -1364,6 +1364,10 @@ def do_run(batch_num, slice_num=-1):
             # torch.cuda.manual_seed_all(seed)
             #torch.backends.cudnn.deterministic = True
 
+        if args.cool_down >= 1:
+            cooling_delay = round((args.steps / args.cool_down),2)
+            print(f'Adding {cooling_delay} a second pause between steps for cool down (total of {args.cool_down} seconds).')
+        
         # Use next prompt in series when doing a batch run
         if animation_mode == "None":
             frame_num = batch_num
@@ -1667,6 +1671,8 @@ def do_run(batch_num, slice_num=-1):
             samples = do_sample_fn(init, steps - cur_t - 1)
             for j, sample in enumerate(samples):
                 actual_run_steps += 1
+                if args.cool_down >= 1:
+                    time.sleep(cooling_delay)
                 progressBar.n = actual_run_steps
                 progressBar.refresh()
                 cur_t -= 1
@@ -2830,7 +2836,8 @@ args = {
     'smooth_schedules': smooth_schedules,
     'render_mask': render_mask,
     'perlin_brightness': perlin_brightness,
-    'perlin_contrast': perlin_contrast
+    'perlin_contrast': perlin_contrast,
+    'cool_down': cool_down
 }
 
 args = SimpleNamespace(**args)
@@ -3138,7 +3145,6 @@ try:
                 resultslice = Image.open(progress_image).convert('RGBA')
                 betterslices.append((resultslice.copy(), coord_x, coord_y)) #TODO add coordinates here
                 resultslice.close()
-                time.sleep(cool_down)
             #TODO replace below with new alpha masks and place them appropriately
             # generate an alpha mask for compositing the chunks
             alpha = Image.new('L', (args.side_x, args.side_y), color=0xFF)
@@ -3168,10 +3174,6 @@ try:
         if "cuda" in str(device):
             with torch.cuda.device(device):
                 torch.cuda.empty_cache()
-        if (batch_image + 1) < n_batches:
-            if cool_down != 0:
-                print(f'Pausing {cool_down} seconds to let your poor GPU have a break.')
-                time.sleep(cool_down)
 
 except KeyboardInterrupt:
     pass
