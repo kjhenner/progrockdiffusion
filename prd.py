@@ -1365,8 +1365,8 @@ def do_run(batch_num, slice_num=-1):
             #torch.backends.cudnn.deterministic = True
 
         if args.cool_down >= 1:
-            cooling_delay = round((args.steps / args.cool_down),2)
-            print(f'Adding {args.cool_down} seconds of cool down time ({cooling_delay} per step).')
+            cooling_delay = round((args.cool_down / args.steps),2)
+            print(f'Adding {args.cool_down} seconds of cool down time ({cooling_delay} per step)')
         
         # Use next prompt in series when doing a batch run
         if animation_mode == "None":
@@ -1612,7 +1612,7 @@ def do_run(batch_num, slice_num=-1):
         else:
             sample_fn = diffusion.plms_sample_loop_progressive
 
-        progressBar = tqdm(range(steps))
+        progressBar = tqdm(range(steps), initial=args.skip_steps)
         starting_init = init
         # the actual image gen
         gc.collect()
