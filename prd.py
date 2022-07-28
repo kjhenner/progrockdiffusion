@@ -250,6 +250,7 @@ animation_mode = "None"  # "Video Input", "2D"
 gobig_orientation = "vertical"
 gobig_scale = 2
 gobig_skip_ratio = 0.6
+gobig_overlap = 64
 symmetry_loss_v = False
 symmetry_loss_h = False
 symm_loss_scale = 2400
@@ -811,6 +812,8 @@ for setting_arg in cl_args.settings:
                 gobig_scale = int(settings_file['gobig_scale'])
             if is_json_key_present(settings_file, 'gobig_skip_ratio'):
                 gobig_skip_ratio = (settings_file['gobig_skip_ratio'])
+            if is_json_key_present(settings_file, 'gobig_overlap'):
+                gobig_overlap = (settings_file['gobig_overlap'])
             if is_json_key_present(settings_file, 'symmetry_loss'):
                 symmetry_loss_v = (settings_file['symmetry_loss'])
                 print("symmetry_loss was depracated, please use symmetry_loss_v in the future")
@@ -1938,10 +1941,15 @@ def save_settings():
         'sharpen_preset': sharpen_preset,
         'keep_unsharp': keep_unsharp,
         'gobig_scale': gobig_scale,
+        'gobig_skip_ratio': gobig_skip_ratio,
+        'gobig_overlap': gobig_overlap,
         'symmetry_loss_v': symmetry_loss_v,
         'symmetry_loss_h': symmetry_loss_h,
         'sloss_scale': symm_loss_scale,
         'symm_switch': symm_switch,
+        'perlin_brightness': perlin_brightness,
+        'perlin_contrast': perlin_contrast,
+        'use_jpg': use_jpg
     }
     with open(f"{batchFolder}/{batch_name}_{batchNum}_settings.json",  "w+", encoding="utf-8") as f:  # save settings
         json.dump(setting_list, f, ensure_ascii=False, indent=4)
@@ -2822,7 +2830,9 @@ args = {
     'sloss_scale': symm_loss_scale,
     'symm_switch': symm_switch,
     'smooth_schedules': smooth_schedules,
-    'render_mask': render_mask
+    'render_mask': render_mask,
+    'perlin_brightness': perlin_brightness,
+    'perlin_contrast': perlin_contrast
 }
 
 args = SimpleNamespace(**args)
@@ -2983,8 +2993,7 @@ def grid_coords(target, original, overlap):
     return result
 
 # Alternative method uses a grid of images that each equal the size of the original render
-def grid_slice(source, og_size=None): # rmask=None, imask=None,
-    overlap = 64
+def grid_slice(source, overlap, og_size=None): # rmask=None, imask=None,
     width, height = og_size
     canvas_width, canvas_height = source.size
     coordinates = grid_coords(source.size, og_size, overlap)
@@ -3065,7 +3074,7 @@ try:
             else:
                 source_imask = None
             # Slice source_image into overlapping slices
-            slices = grid_slice(source_image, og_size)
+            slices = grid_slice(source_image, gobig_overlap, og_size)
             if source_render_mask is not None:
                 rmasks = grid_slice(source_render_mask, og_size)
             else:
@@ -3138,7 +3147,7 @@ try:
             alpha_gradient = ImageDraw.Draw(alpha)
             a = 0
             i = 0
-            overlap = 64
+            overlap = gobig_overlap
             shape = ((args.side_x, args.side_y), (0,0))
             while i < overlap:
                 alpha_gradient.rectangle(shape, fill = a)

@@ -75,6 +75,7 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **gobig_orientation** | "vertical" | Which direction to do slices for gobig mode. Options are vertical or horizontal, but vertical is best in most cases
 | **gobig_scale** | 2 | Amount to scale original image by (2 is recommended, 3 or 4 is getting nuts)
 | **gobig_skip_ratio** | 0.6 | Amount of steps to skip (60% is usually good - too high and there's not enough time for gobig to work -- too low and gobig will add unwanted detail)
+| **gobig_overlap** | 64 | Size in pixels for how much to overlap (blend) images in gobig mode, to hide seams
 | **animation_mode** | None | Animation mode. Options are "None", "2D", "Video Input" - CAPS MATTER
 | **key_frames** | true | Animation stuff...
 | **angle** | "0:(0)"| Animation stuff...
