@@ -426,7 +426,7 @@ diffusion_model.grid(row=1, column=6, pady=5, padx=2, sticky=NW)
 
 diffusion_model_text = get_text('diffusion_model')
 diffusion_model_drop = OptionMenu(
-    frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008120',
+    frame1, diffusion_model_text, '512x512_diffusion_uncond_finetune_008100',
     '256x256_openai_comics_faces_by_alex_spirin', '256x256_diffusion_uncond',
     'pixel_art_diffusion_hard_256', 'pixel_art_diffusion_soft_256',
     'pixelartdiffusion4k', 'portrait_generator_v001', 'watercolordiffusion',
