@@ -324,6 +324,11 @@ All set! You can now switch between the two by simply doing:
 conda activate progrockdiffusion
 conda activate prdcpu
 ```
+## Store clip models in PRD models directory
+By default clip will store its models in your home directory, under '.cache/clip'
+This can be useful if you use multiple PRD directories, or PRD as well as Disco Diffusion, as you will only need to store the models once. However, some people prefer to keep the models with PRD, so that they can be stored on a drive different to the one their home directory is on.
+To store them in the models folder, set an environment variable of LOCAL_CLIP_MODELS (to any value, it doesn't matter it just needs to be set).
+Note: This does not effect OpenClip models, which has no option to change where the models are stored
 
 # Notes
 

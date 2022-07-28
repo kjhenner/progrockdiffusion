@@ -126,13 +126,11 @@ createPath(outDirPath)
 model_path = f'{root_path}/models'
 createPath(model_path)
 
-if os.getenv("CACHE_CLIP_MODELS"):
+if os.getenv("LOCAL_CLIP_MODELS"):
     model_path_clip = model_path
 else:
     home_dir = os.path.expanduser('~')
     model_path_clip = os.path.join(home_dir, ".cache", "clip")
-    print(f'Setting CLIP download directory to {model_path_clip}')
-
 
 model_256_downloaded = False
 model_512_downloaded = False
