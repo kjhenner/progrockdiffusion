@@ -40,7 +40,7 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **fuzzy_prompt** | false | Controls whether to add multiple noisy prompts to the prompt losses
 | **rand_mag** | 0.05 | Controls how far it can stray from your prompt - not used unless either fuzzy_prompt is true, or an init image is used
 | **eta** | "auto" | Has to do with how much the generator can stray from your prompt. Affected by steps, so "auto" will calculate a good value.
-| **diffusion_model** | "512x512_diffusion_uncond_finetune_008100", "256x256_openai_comics_faces_by_alex_spirin_084000", "256x256_diffusion_uncond", "pixel_art_diffusion_hard_256", "pixel_art_diffusion_soft_256", "pixelartdiffusion4k", "portrait_generator_v001", "watercolordiffusion", "watercolordiffusion_2", "PulpSciFiDiffusion"
+| **diffusion_model** | "512x512_diffusion_uncond_finetune_008100" | Additional options are: "256x256_openai_comics_faces_by_alex_spirin", "256x256_diffusion_uncond", "pixel_art_diffusion_hard_256", "pixel_art_diffusion_soft_256", "pixelartdiffusion4k", "portrait_generator_v001", "watercolordiffusion", "watercolordiffusion_2", "PulpSciFiDiffusion", "FeiArt_Handpainted_CG_Diffusion", "IsometricDiffusionRevrart512px"
 | **use_secondary_model** | true | Reduces memory and improves speed, potentially at a loss of quality
 | **diffusion_steps** | 1000 | Note: The code seems to calculate this no matter what you put in, so might as well leave it
 | **sampling_mode** | "ddim"  | Options are "plms" or "ddim" - plms can reach a nice image in fewer steps, but may not look as good as ddim.
