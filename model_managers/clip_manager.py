@@ -59,8 +59,9 @@ class ClipManager:
             self,
             name: str,
             cut_count_multiplier: int,
+            download_root: str,
             device,
-            use_cut_heatmap=False,
+            use_cut_heatmap,
             pad_inner_cuts=False,
             cutout_debug_image_dir='cutout_debug_images'
     ):
@@ -70,6 +71,7 @@ class ClipManager:
         self.prompt_weights = None
         self.prompt_embeds = None
         self.device = device
+        self.download_root = download_root
         self.cut_heatmap = None
         self.use_cut_heatmap = use_cut_heatmap
         self.pad_inner_cuts = pad_inner_cuts
@@ -92,6 +94,7 @@ class ClipManager:
                 self.model = clip.load(
                     CLIP_NAME_MAP[self.name],
                     jit=False,
+                    download_root=self.download_root,
                     device=self.device
                 )[0].eval().requires_grad_(False)
 

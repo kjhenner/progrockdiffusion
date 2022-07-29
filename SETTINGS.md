@@ -21,13 +21,17 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **cutn_batches_final** | "None" | If set, the image will start with cutn_batches and progress to this number by the final step
 | **max_frames** | 10000 | No idea
 | **interp_spline** | "Linear" | Do not change, currently will not look good.
-| **init_image** | null | The starting image to use. Usuallly leave this blank and it will start with randomness
+| **init_image** | null | The starting image to use. Usualy leave this blank and it will start with randomness
+| **init_masked** | null | Optional second init - include the bits you want to render against and leave the rest black - leave null if you want perlin noise instead. Use in conjunction with render_mask
+| **render_mask** | null | A black and white image that tells the compositor what to keep (white) or leave original (black) - used in conjunction with init_image and init_masked.
 | **init_scale** | 1000 | This enhances the effect of the init image, a good value is 1000
 | **skip_steps** | 0 | How many steps in the overall process to skip. Generally leave this at 0, though if using an init_image it is recommended to be 50% of overall steps
 | **frames_scale** | 1500 | Tries to guide the new frame to looking like the old one. A good default is 1500.
 | **frames_skip_steps** | "60%" | Will blur the previous frame - higher values will flicker less
 | **perlin_init** | false | Option to start with random perlin noise
 | **perlin_mode** | "mixed" | Other options are "grey" or "color", what they do I'm not sure
+| **perlin_contrast** | 1.0 | Amount of contrast adjustment for perlin_init
+| **perlin_brightness** | 1.0 | Amount of brightness adjustment for perlin_init
 | **skip_augs** | false | Controls whether to skip torchvision augmentations
 | **randomize_class** | true | Controls whether the imagenet class is randomly changed each iteration
 | **clip_denoised** | false | Determines whether CLIP discriminates a noisy or denoised image
@@ -39,7 +43,7 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **diffusion_model** | "512x512_diffusion_uncond_finetune_008100", "256x256_openai_comics_faces_by_alex_spirin_084000", "256x256_diffusion_uncond", "pixel_art_diffusion_hard_256", "pixel_art_diffusion_soft_256", "pixelartdiffusion4k", "portrait_generator_v001", "watercolordiffusion", "watercolordiffusion_2", "PulpSciFiDiffusion"
 | **use_secondary_model** | true | Reduces memory and improves speed, potentially at a loss of quality
 | **diffusion_steps** | 1000 | Note: The code seems to calculate this no matter what you put in, so might as well leave it
-| **sampling_mode** | "plms"  | Options are "plms" or "ddim" - plms can reach a nice image in fewer steps, but may not look as good as ddim.
+| **sampling_mode** | "ddim"  | Options are "plms" or "ddim" - plms can reach a nice image in fewer steps, but may not look as good as ddim.
 | **ViTB32** | 0.0 | Enable (1.0) or Disable (0.0) this CLIP Model. Between 0.0 and 1.0 is a weight factor
 | **ViTB16** | 0.0 | Enable (1.0) or Disable (0.0) this CLIP Model. Between 0.0 and 1.0 is a weight factor
 | **ViTL14** | 0.0 | Enable (1.0) or Disable (0.0) this CLIP Model. Between 0.0 and 1.0 is a weight factor
@@ -71,6 +75,7 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **gobig_orientation** | "vertical" | Which direction to do slices for gobig mode. Options are vertical or horizontal, but vertical is best in most cases
 | **gobig_scale** | 2 | Amount to scale original image by (2 is recommended, 3 or 4 is getting nuts)
 | **gobig_skip_ratio** | 0.6 | Amount of steps to skip (60% is usually good - too high and there's not enough time for gobig to work -- too low and gobig will add unwanted detail)
+| **gobig_overlap** | 64 | Size in pixels for how much to overlap (blend) images in gobig mode, to hide seams
 | **animation_mode** | None | Animation mode. Options are "None", "2D", "Video Input" - CAPS MATTER
 | **key_frames** | true | Animation stuff...
 | **angle** | "0:(0)"| Animation stuff...
@@ -85,7 +90,8 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **symm_loss_scale** |  20000 | helps control how closely each side should match during symmetry. Definitely play with this number to get the results you're looking for.
 | **symm_switch** | 45 | what step to stop doing symmetry mode
 | **stop_early** | 0 | stop processing your image at a certain step
-| **render_mask** | null | A black and white image that tells the renderer where to draw (white) and not draw (black).
+| **use_jpg** | false | Save images as jpg rather than PNG (save disk space at cost of image quality)
+| **cool_down** | 0 | total # of idle seconds to add to your render, which will be divided between the steps, to let your GPU cool off.
 
 ## Text Prompts
 There are a handful of techniques available within Text Prompts. Here are a few examples:

@@ -68,6 +68,7 @@ import hashlib
 import random
 import numpy as np
 from datetime import datetime
+import time
 from guided_diffusion.script_util import create_model_and_diffusion, model_and_diffusion_defaults
 from resize_right import resize
 import clip
@@ -81,7 +82,7 @@ from types import SimpleNamespace
 import json5 as json
 from glob import glob
 from PIL.PngImagePlugin import PngInfo
-from PIL import Image, ImageOps, ImageStat, ImageEnhance
+from PIL import Image, ImageOps, ImageStat, ImageEnhance, ImageDraw
 import lpips
 import timm
 import math
@@ -125,6 +126,12 @@ createPath(outDirPath)
 model_path = f'{root_path}/models'
 createPath(model_path)
 
+if os.getenv("LOCAL_CLIP_MODELS"):
+    model_path_clip = model_path
+else:
+    home_dir = os.path.expanduser('~')
+    model_path_clip = os.path.join(home_dir, ".cache", "clip")
+
 model_256_downloaded = False
 model_512_downloaded = False
 model_secondary_downloaded = False
@@ -153,6 +160,7 @@ cutn_batches_final = None
 max_frames = 10000
 interp_spline = "Linear"
 init_image = None
+init_masked = None
 init_scale = 1000
 skip_steps = 0
 skip_steps_ratio = 0.0
@@ -160,6 +168,8 @@ frames_scale = 1500
 frames_skip_steps = "60%"
 perlin_init = False
 perlin_mode = "mixed"
+perlin_contrast = 1.0
+perlin_brightness = 1.0
 skip_augs = False
 randomize_class = True
 clip_denoised = False
@@ -238,12 +248,14 @@ animation_mode = "None"  # "Video Input", "2D"
 gobig_orientation = "vertical"
 gobig_scale = 2
 gobig_skip_ratio = 0.6
+gobig_overlap = 64
 symmetry_loss_v = False
 symmetry_loss_h = False
 symm_loss_scale = 2400
 symm_switch = 45
 use_jpg = False
 render_mask = None
+cool_down = 0
 
 # Command Line parse
 
@@ -314,7 +326,7 @@ def parse_args():
         '--gui',
         action='store_true',
         required=False,
-        help='Use the PyQt5 GUI'
+        help='(deprecated, please invoke the gui separately)'
     )
 
     my_parser.add_argument(
@@ -584,7 +596,7 @@ for setting_arg in cl_args.settings:
             if is_json_key_present(settings_file, 'image_prompts'):
                 image_prompts = (settings_file['image_prompts'])
             if is_json_key_present(settings_file, 'clip_guidance_scale'):
-                if type(settings_file['clip_guidance_scale']) == str:
+                if (type(settings_file['clip_guidance_scale']) == str) and ((settings_file['clip_guidance_scale']) != "random"):
                     clip_guidance_scale = dynamic_value(settings_file['clip_guidance_scale'])
                 else:
                     clip_guidance_scale = clampval('clip_guidance_scale', 1500, (settings_file['clip_guidance_scale']), 100000)
@@ -617,6 +629,8 @@ for setting_arg in cl_args.settings:
                 interp_spline = (settings_file['interp_spline'])
             if is_json_key_present(settings_file, 'init_image'):
                 init_image = (settings_file['init_image'])
+            if is_json_key_present(settings_file, 'init_masked'):
+                init_masked = (settings_file['init_masked'])
             if is_json_key_present(settings_file, 'init_scale'):
                 init_scale = (settings_file['init_scale'])
             if is_json_key_present(settings_file, 'skip_steps'):
@@ -633,6 +647,10 @@ for setting_arg in cl_args.settings:
                 perlin_init = (settings_file['perlin_init'])
             if is_json_key_present(settings_file, 'perlin_mode'):
                 perlin_mode = (settings_file['perlin_mode'])
+            if is_json_key_present(settings_file, 'perlin_contrast'):
+                perlin_contrast = (settings_file['perlin_contrast'])
+            if is_json_key_present(settings_file, 'perlin_brightness'):
+                perlin_brightness = (settings_file['perlin_brightness'])
             if is_json_key_present(settings_file, 'skip_augs'):
                 skip_augs = (settings_file['skip_augs'])
             if is_json_key_present(settings_file, 'randomize_class'):
@@ -642,7 +660,7 @@ for setting_arg in cl_args.settings:
             if is_json_key_present(settings_file, 'clamp_grad'):
                 clamp_grad = (settings_file['clamp_grad'])
             if is_json_key_present(settings_file, 'clamp_max'):
-                if type(settings_file['clamp_max']) == str:
+                if (type(settings_file['clamp_max']) == str) and ((settings_file['clamp_max']) != "random"):
                     clamp_max = dynamic_value(settings_file['clamp_max'])
                 else:
                     clamp_max = clampval('clamp_max', 0.001, settings_file['clamp_max'], 0.3)
@@ -720,7 +738,7 @@ for setting_arg in cl_args.settings:
             if is_json_key_present(settings_file, 'cut_innercut'):
                 cut_innercut = dynamic_value(settings_file['cut_innercut'])
             if is_json_key_present(settings_file, 'cut_ic_pow'):
-                if type(settings_file['cut_ic_pow']) == str:
+                if (type(settings_file['cut_ic_pow']) == str) and ((settings_file['cut_ic_pow']) != "random"):
                     cut_ic_pow = dynamic_value(settings_file['cut_ic_pow'])
                 else:
                     cut_ic_pow = clampval('cut_ic_pow', 0.0, (settings_file['cut_ic_pow']), 100)
@@ -792,6 +810,8 @@ for setting_arg in cl_args.settings:
                 gobig_scale = int(settings_file['gobig_scale'])
             if is_json_key_present(settings_file, 'gobig_skip_ratio'):
                 gobig_skip_ratio = (settings_file['gobig_skip_ratio'])
+            if is_json_key_present(settings_file, 'gobig_overlap'):
+                gobig_overlap = (settings_file['gobig_overlap'])
             if is_json_key_present(settings_file, 'symmetry_loss'):
                 symmetry_loss_v = (settings_file['symmetry_loss'])
                 print("symmetry_loss was depracated, please use symmetry_loss_v in the future")
@@ -807,6 +827,8 @@ for setting_arg in cl_args.settings:
                 use_jpg = (settings_file['use_jpg'])
             if is_json_key_present(settings_file, 'render_mask'):
                 render_mask = (settings_file['render_mask'])
+            if is_json_key_present(settings_file, 'cool_down'):
+                cool_down = (settings_file['cool_down'])
 
     except Exception as e:
         print('Failed to open or parse ' + setting_arg + ' - Check formatting.')
@@ -818,7 +840,6 @@ print('')
 width_height = [width_height[0] * width_height_scale, width_height[1] * width_height_scale]
 
 if symmetry_loss_v or symmetry_loss_h:
-    #symm_switch = 100.*(1. - (symm_switch/steps))
     print(f"Symmetry will end at step {symm_switch}")
 
 # Now override some depending on command line and maybe a special case
@@ -830,14 +851,14 @@ if cl_args.ignoreseed:
     set_seed = 'random_seed'
     print(f'Using a random seed instead of the one provided by the JSON file.')
 
-if cl_args.hidemetadata:
+try:
+    environ_hidemetadata = os.environ.get('PRD_HIDE_METADATA')
+except:
+    environ_hidemetadata = False
+
+if cl_args.hidemetadata or environ_hidemetadata:
     add_metadata = False
     print(f'Hide metadata flag is ON, settings will not be stored in the PNG output.')
-
-gui = False
-if cl_args.gui:
-    gui = True
-    import prdgui
 
 letsgobig = False
 gobig_vertical = False
@@ -1020,18 +1041,17 @@ def randomize_prompts(prompts):
     # take a list of prompts and handle any _random_ elements
     newprompts = []
     for prompt in prompts:
-        if "_" in prompt:
-            while "_" in prompt:
-                start = prompt.index('_')
-                end = prompt.index('_', start+1)
-                swap = prompt[(start + 1):end]
-                swapped = randomizer(swap)
-                prompt = prompt.replace(f'_{swap}_', swapped, 1)
-            newprompt = prompt
-        elif "<" in prompt:
+        if "<" in prompt:
             newprompt = dynamic_value(prompt)
         else:
             newprompt = prompt
+        if "_" in newprompt:
+            while "_" in newprompt:
+                start = newprompt.index('_')
+                end = newprompt.index('_', start+1)
+                swap = newprompt[(start + 1):end]
+                swapped = randomizer(swap)
+                newprompt = newprompt.replace(f'_{swap}_', swapped, 1)
         newprompts.append(newprompt)
     return newprompts
 
@@ -1214,7 +1234,16 @@ def create_perlin_noise(octaves=[1, 1, 1, 1], width=2, height=2, grayscale=True)
         out = TF.resize(size=(side_y, side_x), img=out)
         out = TF.to_pil_image(out.clamp(0, 1).squeeze())
 
+    # out = ImageOps.autocontrast(out, preserve_tone=True)
     out = ImageOps.autocontrast(out)
+    if perlin_contrast != 1.0:
+        out2 = ImageEnhance.Contrast(out)
+        out3 = out2.enhance(perlin_contrast)
+        out = out3
+    if perlin_brightness != 1.0:
+        out2 = ImageEnhance.Brightness(out)
+        out3 = out2.enhance(perlin_brightness)
+        out = out3
     return out
 
 
@@ -1335,6 +1364,10 @@ def do_run(batch_num, slice_num=-1):
             # torch.cuda.manual_seed_all(seed)
             #torch.backends.cudnn.deterministic = True
 
+        if args.cool_down >= 1:
+            cooling_delay = round((args.cool_down / args.steps),2)
+            print(f'Adding {args.cool_down} seconds of cool down time ({cooling_delay} per step)')
+        
         # Use next prompt in series when doing a batch run
         if animation_mode == "None":
             frame_num = batch_num
@@ -1400,7 +1433,7 @@ def do_run(batch_num, slice_num=-1):
             for clip_manager in clip_managers:
                 # We should probably let the clip_manager manage its own state
                 # but do this for now.
-                if sample_prompt:
+                if sample_prompt and print_sample_prompt: # only need to do this if the prompt has changed
                     prompt_embeds, prompt_weights = clip_manager.embed_text_prompts(
                         prompts=sample_prompt,
                         step=s,
@@ -1409,7 +1442,7 @@ def do_run(batch_num, slice_num=-1):
                     )
                     clip_manager.prompt_embeds = prompt_embeds
                     clip_manager.prompt_weights = prompt_weights
-                if image_prompts:  # why image_prompts instead of sample_image_prompt?
+                if sample_image_prompt and print_sample_image_prompt: # only need to do this if the prompt has changed
                     img_prompt_embeds, img_prompt_weights = clip_manager.embed_image_prompts(
                         prompts=sample_image_prompt,
                         step=s,
@@ -1447,14 +1480,39 @@ def do_run(batch_num, slice_num=-1):
                     initial_weights = True
                     break
 
+        # if no init_masked is provided, we make one with the render mask
+        def make_masked_init(image, mask):
+            image = np.array(image)
+            image = image.astype(np.float32)/255.0
+            image = image[None].transpose(0,3,1,2)
+            image = torch.from_numpy(image)
+
+            mask = np.array(mask)
+            mask = mask.astype(np.float32)/255.0
+            mask = mask[None,None]
+            mask = torch.from_numpy(mask)
+
+            masked_image = (0+mask)*image
+            return masked_image
+
         if (not initial_weights):
             do_weights(0, clip_managers)
 
+        #Init Image stuff:
+        #init is ultimately what we render against
+        #init_image is the image to use to start with, unless we have init_masked, in which case we just store init_image
+        #init_masked is a secondary init image with data only where we want to render (can be perlin instead, see below)
+        #render_mask is tells us what part of the render to keep (white) and what part to restore from init_image
+        #TODO: consider how this is affected by gobig
         init = None
         if init_image is not None:
             init_img = Image.open(fetch(init_image)).convert('RGB')
             init_img = init_img.resize((args.side_x, args.side_y), get_resampling_mode())
-            init = TF.to_tensor(init_img).to(device).unsqueeze(0).mul(2).sub(1)
+            if init_masked is not None:
+                init_masked_img = Image.open(fetch(init_masked)).convert('RGB')
+                init = TF.to_tensor(init_masked_img).to(device).unsqueeze(0).mul(2).sub(1)
+            else:
+                init = TF.to_tensor(init_img).to(device).unsqueeze(0).mul(2).sub(1)
             init_img = init_img.convert('RGBA') # now that we've made our init, we add an alpha channel for later compositing
 
         rmask = None
@@ -1462,6 +1520,13 @@ def do_run(batch_num, slice_num=-1):
             rmask_img = Image.open(fetch(render_mask)).convert('L')
             rmask_img = rmask_img.resize((args.side_x, args.side_y), get_resampling_mode())
             rmask = TF.to_tensor(rmask_img).to(device).unsqueeze(0)
+            if init_masked is None:
+                init = gen_perlin()
+                init = TF.to_pil_image(init.clamp(0, 1).squeeze())
+                init_mask = make_masked_init(init, rmask_img).to(device)
+                init_mask = TF.to_pil_image(init_mask.clamp(0, 1).squeeze())
+                init = TF.to_tensor(init_mask).to(device).unsqueeze(0).mul(2).sub(1)
+                #init_mask.save('init_mask.png')
 
         if (args.perlin_init == True) and (init_image == None):
             init = gen_perlin()
@@ -1547,7 +1612,7 @@ def do_run(batch_num, slice_num=-1):
         else:
             sample_fn = diffusion.plms_sample_loop_progressive
 
-        progressBar = tqdm(range(steps))
+        progressBar = tqdm(range(steps), initial=args.skip_steps)
         starting_init = init
         # the actual image gen
         gc.collect()
@@ -1606,6 +1671,8 @@ def do_run(batch_num, slice_num=-1):
             samples = do_sample_fn(init, steps - cur_t - 1)
             for j, sample in enumerate(samples):
                 actual_run_steps += 1
+                if args.cool_down >= 1:
+                    time.sleep(cooling_delay)
                 progressBar.n = actual_run_steps
                 progressBar.refresh()
                 cur_t -= 1
@@ -1699,7 +1766,7 @@ def do_run(batch_num, slice_num=-1):
                                     print('\nUsing render mask to composite rendered image with init image.')
                                     image2 = image.copy()
                                     image2.putalpha(rmask_img)
-                                    image2.save('test.png')
+                                    #image2.save('test.png')
                                     image3 = image2.copy()
                                     image3 = Image.alpha_composite(init_img, image3)
                                     image = image3.copy()
@@ -1729,9 +1796,6 @@ def do_run(batch_num, slice_num=-1):
                             progressBar.write(f'Image finished. Using seed {seed + batch_num} for next image.')
 
                     do_weights(steps - cur_t - 1, clip_managers)
-
-                if (gui):
-                    prdgui.update_image(image)
 
                 do_weights(steps - cur_t - 1, clip_managers)
 
@@ -1802,6 +1866,7 @@ def save_settings():
         'interp_spline': interp_spline,
         # 'rotation_per_frame': rotation_per_frame,
         'init_image': init_image,
+        'init_masked': init_masked,
         'render_mask': render_mask,
         'init_scale': init_scale,
         'skip_steps': skip_steps,
@@ -1880,10 +1945,15 @@ def save_settings():
         'sharpen_preset': sharpen_preset,
         'keep_unsharp': keep_unsharp,
         'gobig_scale': gobig_scale,
+        'gobig_skip_ratio': gobig_skip_ratio,
+        'gobig_overlap': gobig_overlap,
         'symmetry_loss_v': symmetry_loss_v,
         'symmetry_loss_h': symmetry_loss_h,
         'sloss_scale': symm_loss_scale,
         'symm_switch': symm_switch,
+        'perlin_brightness': perlin_brightness,
+        'perlin_contrast': perlin_contrast,
+        'use_jpg': use_jpg
     }
     with open(f"{batchFolder}/{batch_name}_{batchNum}_settings.json",  "w+", encoding="utf-8") as f:  # save settings
         json.dump(setting_list, f, ensure_ascii=False, indent=4)
@@ -2285,6 +2355,7 @@ clip_managers = [
     ClipManager(
         name=model_name,
         cut_count_multiplier=eval(model_name),
+        download_root=model_path_clip,
         device=device,
         use_cut_heatmap=True,
         pad_inner_cuts=True
@@ -2763,7 +2834,10 @@ args = {
     'sloss_scale': symm_loss_scale,
     'symm_switch': symm_switch,
     'smooth_schedules': smooth_schedules,
-    'render_mask': render_mask
+    'render_mask': render_mask,
+    'perlin_brightness': perlin_brightness,
+    'perlin_contrast': perlin_contrast,
+    'cool_down': cool_down
 }
 
 args = SimpleNamespace(**args)
@@ -2806,8 +2880,6 @@ def addalpha(im, mask):
     return(im)
 
 # take a source image and layer in the slices on top
-
-
 def mergeimgs(source, slices):
     global slices_todo
     source.convert("RGBA")
@@ -2823,12 +2895,13 @@ def mergeimgs(source, slices):
 
 # Slices an image into the configured number of chunks. Overlap is currently 64px but should become dynamic
 # Also slices render_masks to match
-def slice(source, rmask):
+def slice(source, rmask, imask):
     global slices_todo
     width, height = source.size
     overlap = 64  # int(height / slices_todo / 4)
     slices = []
     slice_rmasks = []
+    slice_imasks = []
     x = 0
     y = 0
     i = 0
@@ -2843,21 +2916,107 @@ def slice(source, rmask):
         edgex = slice_width
         while i < slices_todo:
             slices.append(source.crop((x, y, edgex, height)))
-            slice_rmasks.append(rmask.crop((x, y, edgex, height)))
+            if rmask is not None:
+                slice_rmasks.append(rmask.crop((x, y, edgex, height)))
+            else:
+                slice_rmasks.append(None)
+            if imask is not None:
+                slice_imasks.append(imask.crop((x, y, edgex, height)))
+            else:
+                slice_imasks.append(None) # does this work?
             x += slice_width - overlap
             edgex = x + slice_width
             i += 1
-    slices_with_rmasks = zip(slices, slice_rmasks)
+    slices_with_rmasks = zip(slices, slice_rmasks, slice_imasks)
     return slices_with_rmasks
 
+# Alternative method composites a grid of images at the positions provided
+def grid_merge(source, slices):
+    source.convert("RGBA")
+    for slice, posx, posy in slices: # go in reverse to get proper stacking
+        source.alpha_composite(slice, (posx, posy))
+    return source
+
+def grid_coords(target, original, overlap):
+    #generate a list of coordinate tuples for our sections, in order of how they'll be rendered
+    #target should be the size for the gobig result, original is the size of each chunk being rendered
+    center = []
+    target_x, target_y = target
+    center_x = int(target_x / 2)
+    center_y = int(target_y / 2)
+    original_x, original_y = original
+    x = center_x - int(original_x / 2)
+    y = center_y - int(original_y / 2)
+    center.append((x,y)) #center chunk
+    uy = y #up
+    uy_list = []
+    dy = y #down
+    dy_list = []
+    lx = x #left
+    lx_list = []
+    rx = x #right
+    rx_list = []
+    while uy > 0: #center row vertical up
+        uy = uy - original_y + overlap
+        uy_list.append((lx, uy))
+    while (dy + original_y) <= target_y: #center row vertical down
+        dy = dy + original_y - overlap
+        dy_list.append((rx, dy))
+    while lx > 0:
+        lx = lx - original_x + overlap
+        lx_list.append((lx, y))
+        uy = y
+        while uy > 0:
+            uy = uy - original_y + overlap
+            uy_list.append((lx, uy))
+        dy = y
+        while (dy + original_y) <= target_y:
+            dy = dy + original_y - overlap
+            dy_list.append((lx, dy))
+    while (rx + original_x) <= target_x:
+        rx = rx + original_x - overlap
+        rx_list.append((rx, y))
+        uy = y
+        while uy > 0:
+            uy = uy - original_y + overlap
+            uy_list.append((rx, uy))
+        dy = y
+        while (dy + original_y) <= target_y:
+            dy = dy + original_y - overlap
+            dy_list.append((rx, dy))
+    # now put all the chunks into one master list of coordinates (essentially reverse of how we calculated them so that the central slices will be on top)
+    result = []
+    for coords in dy_list[::-1]:
+        result.append(coords)
+    for coords in uy_list[::-1]:
+        result.append(coords)
+    for coords in rx_list[::-1]:
+        result.append(coords)
+    for coords in lx_list[::-1]:
+        result.append(coords)
+    result.append(center[0])
+    return result
+
+# Alternative method uses a grid of images that each equal the size of the original render
+def grid_slice(source, overlap, og_size=None): # rmask=None, imask=None,
+    width, height = og_size
+    coordinates = grid_coords(source.size, og_size, overlap)
+    # loc_width and loc_height are the center point of the goal size, and we'll start there and work our way out
+    slices = []
+    for coordinate in coordinates:
+        x, y = coordinate
+        slices.append(((source.crop((x, y, x+width, y+height))), x, y))
+    global slices_todo
+    slices_todo = len(slices) - 1
+    return slices
 
 # FINALLY DO THE RUN
 try:
-    if (gui):
-        print("running with gui")
-        prdgui.run_gui(do_run, side_x, side_y)
+    if (cl_args.gui):
+        print("Using the gui this way is deprecated. Invoke it first with 'python prdgui.py'")
     print(f'\nStarting batch!')
     for batch_image in range(n_batches):
+        og_size = (side_x, side_y)
         if cl_args.gobiginit is None:
             do_run(batch_image)
         if letsgobig:
@@ -2880,21 +3039,23 @@ try:
             # Setup some filenames
             if cl_args.cuda != '0':  # handle if a different GPU is in use
                 slice_image = (f'slice{cl_args.cuda}.png')
+                slice_imask = (f'slice_imask{cl_args.cuda}.png')
                 slice_rmask = (f'slice_rmask{cl_args.cuda}.png')
                 final_output_image = (f'{batchFolder}/{batch_name}_go_big_{cl_args.cuda}_{batchNum}_{batch_image}.png')
             else:
-
                 slice_image = 'slice.png'
+                slice_imask = 'slice_imask.png'
                 slice_rmask = 'slice_rmask.png'
                 final_output_image = (f'{batchFolder}/{batch_name}_go_big_{batchNum}_{batch_image}.png')
 
             # To keep things simple (hah), we'll create a fully white render_mask to use in the case that there's no provided render_mask
             # that way there's going to be a render_mask no matter what, and we don't have to keep checking for it
-            # And just to keep everyone on their toes, a render_mask is is for telling do_run where to render/not render, while a mask is for gobig to blend slices
-            if render_mask is None:
-                source_render_mask = Image.new('RGBA', (args.side_x, args.side_y), color = (255,255,255))
-            else:
+            # And just to keep everyone on their toes, a render_mask is is for telling do_run where to render/not render, while a mask is for gobig to blend slices, and an init_mask is what to render against when rendering with an rmask -- got it?
+            if render_mask is not None:
                 source_render_mask = Image.open(render_mask).convert('RGBA')
+            else:
+                #source_render_mask = Image.new('RGBA', (args.side_x, args.side_y), color = (255,255,255))
+                source_render_mask = None
 
             # Resize init if needed, as well as any render mask. For now we assume the render mask matches the size of the init.
             if cl_args.gobiginit_scaled == False:
@@ -2903,16 +3064,41 @@ try:
                 reside_y = side_y * gobig_scale
                 source_image = input_image.resize((reside_x, reside_y), get_resampling_mode())
                 input_image.close()
-                source_render_mask = source_render_mask.resize((reside_x, reside_y), get_resampling_mode())
+                if source_render_mask is not None:
+                    source_render_mask = source_render_mask.resize((reside_x, reside_y), get_resampling_mode())
             else:
                 source_image = Image.open(progress_image).convert('RGBA')
-            
+                og_size = (int(side_x / gobig_scale), int(side_y / gobig_scale)) # we want to render sections that are what the original pre-scaled size probably was
+            if init_masked is not None:
+                source_imask = Image.open(init_masked).convert('RGBA')
+                source_imask = source_imask.resize(source_image.size, get_resampling_mode()) # TODO if this works then do the source_render_mask the same way
+            else:
+                source_imask = None
             # Slice source_image into overlapping slices
-            slices = slice(source_image, source_render_mask)
+            slices = grid_slice(source_image, gobig_overlap, og_size)
+            if source_render_mask is not None:
+                rmasks = grid_slice(source_render_mask, og_size)
+            else:
+                rmasks = None
+            if source_imask is not None:
+                imasks = grid_slice(source_imask, og_size)
+            else:
+                imasks = None
+
+            #slices = slice(source_image, source_render_mask, source_imask)
             # Run PRD again for each slice, with proper init image paramaters, etc.
-            i = 1  # just to number the slices as they save
             betterslices = []
-            for chunk, chunk_rmask in slices:
+            #for chunk, chunk_rmask, chunk_imask in slices:
+            for count, chunk_w_coords in enumerate(slices):
+                chunk, coord_x, coord_y = chunk_w_coords
+                if rmasks is not None:
+                    chunk_rmask = rmasks[count][0]
+                else:
+                    chunk_rmask = None
+                if imasks is not None:
+                    chunk_imask = imasks[count][0]
+                else:
+                    chunk_imask = None
                 seed = seed + 1
                 args.seed = seed
                 # Reset underlying systems for another run
@@ -2930,11 +3116,18 @@ try:
                         torch.cuda.empty_cache()
                 # Some original values need to be adjusted for go_big to work properly
                 chunk.save(slice_image)
-                chunk_rmask.save(slice_rmask)
+                if chunk_rmask is not None:
+                    chunk_rmask.save(slice_rmask)
+                if chunk_imask is not None:
+                    chunk_imask.save(slice_imask)
                 args.init_image = slice_image
                 init_image = slice_image
-                args.render_mask = slice_rmask
-                render_mask = slice_rmask
+                if chunk_rmask is not None:
+                    args.render_mask = slice_rmask
+                    render_mask = slice_rmask
+                if chunk_imask is not None:
+                    init_masked = slice_imask
+                    args.init_masked = slice_imask
                 args.symmetry_loss_v = False
                 args.symmetry_loss_h = False
                 args.perlin_init = False
@@ -2943,34 +3136,32 @@ try:
                 args.side_x, args.side_y = chunk.size
                 side_x, side_y = chunk.size
                 args.fix_brightness_contrast = False
-                do_run(batch_image, i)
+                do_run(batch_image, count)
                 print(f'Finished slice, grabbing {progress_image} and adding it to betterslices.')
                 resultslice = Image.open(progress_image).convert('RGBA')
-                betterslices.append(resultslice.copy())
+                betterslices.append((resultslice.copy(), coord_x, coord_y)) #TODO add coordinates here
                 resultslice.close()
+            #TODO replace below with new alpha masks and place them appropriately
+            # generate an alpha mask for compositing the chunks
+            alpha = Image.new('L', (args.side_x, args.side_y), color=0xFF)
+            alpha_gradient = ImageDraw.Draw(alpha)
+            a = 0
+            i = 0
+            overlap = gobig_overlap
+            shape = ((args.side_x, args.side_y), (0,0))
+            while i < overlap:
+                alpha_gradient.rectangle(shape, fill = a)
+                a += 4
                 i += 1
-            # generate an alpha mask
-            # starts at full opacity * initial_value
-            # decrements opacity by gradient * x / width
-            if gobig_vertical:
-                alpha_gradient = Image.new('L', (args.side_x, 1), color=0xFF)
-                a = 0
-                for x in range(args.side_x):
-                    a += 4  # add 4 to alpha at each pixel, to give us a 64 pixel overlap gradient
-                    if a < 255:
-                        alpha_gradient.putpixel((x, 0), a)
-                    else:
-                        alpha_gradient.putpixel((x, 0), 255)
-                alpha = alpha_gradient.resize(betterslices[0].size, Image.Resampling.BICUBIC)
-            # add the generated alpha channel to a mask image
+                shape = ((args.side_x - i, args.side_y - i), (i,i))
             mask = Image.new('RGBA', (args.side_x, args.side_y), color=0)
             mask.putalpha(alpha)
-            i = 1  # start at 1 in the list instead of 0, because we don't need/want a mask on the first (0) image
-            while i < slices_todo:
-                betterslices[i] = addalpha(betterslices[i], mask)
-                i += 1
-            # Once we have all our images, mergeimgs back onto source.png, then save
-            final_output = mergeimgs(source_image, betterslices)
+            finished_slices = []
+            for betterslice, x, y in betterslices:
+                finished_slice = addalpha(betterslice, mask)
+                finished_slices.append((finished_slice, x, y))
+            # # Once we have all our images, mergeimgs back onto source.png, then save
+            final_output = grid_merge(source_image, finished_slices)
             final_output.save(final_output_image)
             print(f'\n\nGO BIG is complete!\n\n ***** NOTE *****\nYour output is saved as {final_output_image}!')
             # set everything back for the next image in the batch
