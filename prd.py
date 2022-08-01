@@ -2357,7 +2357,7 @@ clip_managers = [
         cut_count_multiplier=eval(model_name),
         download_root=model_path_clip,
         device=device,
-        use_cut_heatmap=True,
+        use_cut_heatmap=False,
         pad_inner_cuts=True
     )
     for model_name in CLIP_NAME_MAP.keys() if eval(model_name)
