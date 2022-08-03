@@ -3,7 +3,6 @@ import random
 import logging
 
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
 import torch
 from resize_right import resize
 from torch import nn
@@ -106,12 +105,10 @@ class CutHeatmap(object):
             side_x,
             side_y,
             decay_scale=0.3,
-            decay_gaussian_sigma=7,
             overlap_penalty_coef=0.3
     ):
         self.heatmap = np.ones((side_y, side_x), dtype=np.float32)
         self.decay_scale = decay_scale
-        self.decay_gaussian_sigma = decay_gaussian_sigma
         self.overlap_penalty_coef = overlap_penalty_coef
 
     def add_cut(self, center_x, center_y, cut_size):
@@ -128,7 +125,6 @@ class CutHeatmap(object):
         ] *= self.overlap_penalty_coef
 
     def decay(self):
-        self.heatmap = gaussian_filter(self.heatmap, sigma=self.decay_gaussian_sigma)
         self.heatmap = (
             np.ones(self.heatmap.shape, dtype=np.float32) * self.decay_scale + self.heatmap
         ) / (1 + self.decay_scale)
@@ -141,7 +137,8 @@ class CutHeatmap(object):
         else:
             # Otherwise, only select points half a cut size away from the edge
             centerpoints = self.heatmap[cut_offset:-cut_offset, cut_offset:-cut_offset]
-        linear_idx = np.random.choice(centerpoints.size, p=centerpoints.ravel() / float(centerpoints.sum()))
+        p = (centerpoints.ravel() / centerpoints.sum())
+        linear_idx = np.random.choice(centerpoints.size, p=p)
         y, x = np.unravel_index(linear_idx, centerpoints.shape)
         if not padded:
             x += cut_offset
