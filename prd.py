@@ -1796,7 +1796,10 @@ def do_run(batch_num, slice_num=-1):
                             #     np.random.seed(seed)
                             #     random.seed(seed)
                             #     torch.manual_seed(seed)
-                            progressBar.write(f'Image finished. Using seed {seed + batch_num} for next image.')
+                            if (batch_num + 1) < args.n_batches:
+                                progressBar.write(f'Image finished! Using seed {seed + batch_num + 1} for next image.')
+                            else:
+                                progressBar.write(f'Image finished!')
 
                     do_weights(steps - cur_t - 1, clip_managers)
 
@@ -1916,8 +1919,8 @@ def save_settings():
         'cut_innercut': str(cut_innercut),
         'cut_ic_pow': og_cut_ic_pow,
         'cut_ic_pow_final': cut_ic_pow_final,
-        'cut_heatmaps': cut_heatmaps,
         'cut_icgray_p': str(cut_icgray_p),
+        'cut_heatmaps': cut_heatmaps,
         'smooth_schedules': smooth_schedules,
         'animation_mode': animation_mode,
         'key_frames': key_frames,
