@@ -213,6 +213,7 @@ cut_innercut = "[4]*400+[12]*600"
 cut_ic_pow = "[1]*500+[10]*500"
 cut_ic_pow_final = None
 cut_icgray_p = "[0.2]*400+[0]*600"
+cut_heatmaps = False
 smooth_schedules = False
 key_frames = True
 angle = "0:(0)"
@@ -746,6 +747,8 @@ for setting_arg in cl_args.settings:
                 cut_ic_pow_final = clampval('cut_ic_pow_final', 0.5, (settings_file['cut_ic_pow_final']), 100)
             if is_json_key_present(settings_file, 'cut_icgray_p'):
                 cut_icgray_p = (settings_file['cut_icgray_p'])
+            if is_json_key_present(settings_file, 'cut_heatmaps'):
+                cut_heatmaps = (settings_file['cut_heatmaps'])
             if is_json_key_present(settings_file, 'smooth_schedules'):
                 smooth_schedules = (settings_file['smooth_schedules'])
             if is_json_key_present(settings_file, 'key_frames'):
@@ -1793,7 +1796,10 @@ def do_run(batch_num, slice_num=-1):
                             #     np.random.seed(seed)
                             #     random.seed(seed)
                             #     torch.manual_seed(seed)
-                            progressBar.write(f'Image finished. Using seed {seed + batch_num} for next image.')
+                            if (batch_num + 1) < args.n_batches:
+                                progressBar.write(f'Image finished! Using seed {seed + batch_num + 1} for next image.')
+                            else:
+                                progressBar.write(f'Image finished!')
 
                     do_weights(steps - cur_t - 1, clip_managers)
 
@@ -1914,6 +1920,7 @@ def save_settings():
         'cut_ic_pow': og_cut_ic_pow,
         'cut_ic_pow_final': cut_ic_pow_final,
         'cut_icgray_p': str(cut_icgray_p),
+        'cut_heatmaps': cut_heatmaps,
         'smooth_schedules': smooth_schedules,
         'animation_mode': animation_mode,
         'key_frames': key_frames,
@@ -2357,7 +2364,7 @@ clip_managers = [
         cut_count_multiplier=eval(model_name),
         download_root=model_path_clip,
         device=device,
-        use_cut_heatmap=False,
+        use_cut_heatmap=cut_heatmaps,
         pad_inner_cuts=True
     )
     for model_name in CLIP_NAME_MAP.keys() if eval(model_name)

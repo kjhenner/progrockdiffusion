@@ -71,7 +71,8 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **cut_ic_pow** | 1 | A higher number can add more detail, but may create unwanted fine lines (value range: 0.0 to 100). NOTE: Can be scheduled like cut_overview instead (in which case cut_ic_pow_final is ignored)
 | **cut_ic_pow_final** | "None" |If set, image will start at cut_ic_pow and continue toward cut_ic_pow_final by the end, unless cut_ic_pow is a schedule
 | **cut_icgray_p** | "[0.2]\*400+[0]\*600" | Percent of cuts to do as grayscale, which evidently can help add detail
-| **smooth_schedules** | false | When true, will smooth the transitions within cut_overview and cut_innercut schedules
+| **cut_heatmaps** | false | Helps ensure innercuts are evenly dispersed, at the expense of some render time
+| **smooth_schedules** | false | When true, will smooth the transitions within schedule-style values like cut_overview
 | **gobig_orientation** | "vertical" | Which direction to do slices for gobig mode. Options are vertical or horizontal, but vertical is best in most cases
 | **gobig_scale** | 2 | Amount to scale original image by (2 is recommended, 3 or 4 is getting nuts)
 | **gobig_skip_ratio** | 0.6 | Amount of steps to skip (60% is usually good - too high and there's not enough time for gobig to work -- too low and gobig will add unwanted detail)
@@ -85,8 +86,8 @@ Note that a few of the settings can be randomly chosen -- see the section below 
 | **video_init_path** | "/content/training.mp4"| Animation stuff...
 | **extract_nth_frame** | 2 | Animation stuff...
 | **intermediate_saves**   | 0  | Save in progress. A value of `2` will save a copy at 33% and 66%. 0 will save none. A value of `[5, 9, 34, 45]` will save at steps 5, 9, 34, and 45. A value of `[.5, .7, .9]` will save at 50%, 70%, and 90% of total steps (Make sure to include the brackets)
-| **symmetry_loss_v** | False | Set this to "True" to enable left/right symmetry during the render
-| **symmetry_loss_h** | False | Set this to "True" to enable top/bottom symmetry during the render
+| **symmetry_loss_v** | false | Set this to "true" to enable left/right symmetry during the render
+| **symmetry_loss_h** | false | Set this to "true" to enable top/bottom symmetry during the render
 | **symm_loss_scale** |  20000 | helps control how closely each side should match during symmetry. Definitely play with this number to get the results you're looking for.
 | **symm_switch** | 45 | what step to stop doing symmetry mode
 | **stop_early** | 0 | stop processing your image at a certain step
