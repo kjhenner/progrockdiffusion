@@ -69,6 +69,7 @@
     "cut_ic_pow": "[1]*500+[10]*500",
     "cut_ic_pow_final": null,
     "cut_icgray_p": "[0.2]*400+[0]*600",
+    "cut_heatmaps": false,
     "smooth_schedules": false,
     "intermediate_saves": 0,
     "stop_early": 0,
